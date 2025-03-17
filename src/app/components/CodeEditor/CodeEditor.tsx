@@ -1,4 +1,4 @@
-import { Box, Spinner } from "@chakra-ui/react";
+import { Box, Spinner, Button } from "@chakra-ui/react";
 import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import { editor, languages } from "monaco-types";
 import { useTranslations } from "next-intl";
@@ -36,13 +36,29 @@ const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
           { token: "string", foreground: "#98c379" },
         ],
         colors: {
-          "editor.background": colors.textEditorBackground,
+          "editor.background":  "#21252b",
+        },
+      },
+    ],
+    [
+      "light",
+      {
+        base: "vs",
+        inherit: true,
+        rules: [
+          { token: "keyword", foreground: "#9811e6" },
+          { token: "string", foreground: "#69aa39" },
+        ],
+        colors: {
+          "editor.background": "#ffffff",
+          "editor.foreground": "#000000",
         },
       },
     ],
   ];
 
 const DEFAULT_THEME = "onedark";
+const LIGHT_THEME = "light";
 
 const erdocConfig: languages.LanguageConfiguration = {
   surroundingPairs: [
@@ -97,6 +113,14 @@ const CodeEditor = ({
   const semanticErrT = useTranslations("home.codeEditor.semanticErrorMessages");
   const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
   const { importJSON } = useJSON(onErDocChange);
+  const [currentTheme, setCurrentTheme] = useState(DEFAULT_THEME);
+
+  const toggleTheme = () => {
+    const newTheme =
+      currentTheme === DEFAULT_THEME ? LIGHT_THEME : DEFAULT_THEME;
+    setCurrentTheme(newTheme);
+    thisEditor?.editor.setTheme(newTheme);
+  };
 
   const setEditorErrors = (
     errorMessages: ErrorMessage[],
@@ -174,7 +198,7 @@ const CodeEditor = ({
     for (const [themeName, theme] of editorThemes) {
       monacoInstance.editor.defineTheme(themeName, theme);
     }
-    monacoInstance.editor.setTheme(DEFAULT_THEME);
+    monacoInstance.editor.setTheme(currentTheme);
   };
 
   return (
@@ -185,7 +209,10 @@ const CodeEditor = ({
       flexDir={"column"}
       overflow={"hidden"}
     >
-      <EditorHeader editorRef={editorRef} />
+      <EditorHeader 
+        editorRef={editorRef}
+        currentTheme={currentTheme}
+        onToggleTheme={toggleTheme} />
       <Box
         resize="none"
         pt={0}
