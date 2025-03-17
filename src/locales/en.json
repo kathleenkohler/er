@@ -128,7 +128,8 @@
       "editorHeader": {
         "copy": "Copy code",
         "undo": "Undo (Ctrl+Z)",
-        "redo": "Redo (Ctrl+Y)"
+        "redo": "Redo (Ctrl+Y)",
+        "toggleTheme": "Switch theme"
       }
     }
   }

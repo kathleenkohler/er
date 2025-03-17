@@ -125,7 +125,8 @@
       "editorHeader": {
         "copy": "Copiar código",
         "undo": "Deshacer (Ctrl+Z)",
-        "redo": "Rehacer (Ctrl+Y)"
+        "redo": "Rehacer (Ctrl+Y)",
+        "toggleTheme": "Cambiar tema"
       }
     }
   }

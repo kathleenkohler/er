@@ -1,4 +1,4 @@
-import { Box, IconButton } from "@chakra-ui/react";
+import { Box, IconButton, Switch, Text, HStack } from "@chakra-ui/react";
 import { editor } from "monaco-types";
 import { MutableRefObject, ReactElement, useState } from "react";
 import { colors } from "../../util/colors";
@@ -9,8 +9,12 @@ import { useTranslations } from "next-intl";
 
 export const EditorHeader = ({
   editorRef,
+  currentTheme,
+  onToggleTheme,
 }: {
   editorRef: MutableRefObject<editor.IStandaloneCodeEditor | null>;
+  currentTheme: string;
+  onToggleTheme: () => void;
 }) => {
   const t = useTranslations("home.codeEditor.editorHeader");
 
@@ -22,6 +26,21 @@ export const EditorHeader = ({
       borderBottomColor={"rgb(248 250 252 / 0.16)"}
       className=" flex h-[26px] w-full flex-row items-center justify-end"
     >
+      <HStack spacing={3}>
+        <Text color="white" fontSize="sm">
+          {t("toggleTheme")}
+        </Text>
+        <Switch
+          isChecked={currentTheme === "onedark"}
+          onChange={onToggleTheme}
+          size="sm"
+          sx={{
+            "& .chakra-switch__track": {
+              backgroundColor: currentTheme === "onedark" ? "#c678dd" : "#cbd5e0",
+            },
+          }}
+        />
+      </HStack>
       <div className="flex">
         <EditorButton
           icon={<BiSolidCopyAlt fill="#fff" />}

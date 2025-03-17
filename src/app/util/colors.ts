@@ -1,4 +1,4 @@
 export const colors = {
-  textEditorBackground: "#21252b",
+  textEditorBackground: "#2f3a4c",
   textEditorAccent: "#c678dd",
 };
