@@ -56,7 +56,7 @@ weakEntity =
     
 // Weak entity attributes
 WeakEntityAttribute =
-	identifier:attributeIdentifier [ \t]* childAttributes:declareComposite? [ \t]* isKey:(declareIsPartialKey {return true})?
+	identifier:attributeIdentifier [ \t]* childAttributes:declareComposite? [ \t]* isKey:(declareIsPartialKey {return true})? [ \t]*
     {
     	const attribute = {name: identifier, location: getLocation(location)}
         attribute.isKey = isKey === true
@@ -71,7 +71,7 @@ listOfDeps = deps:(head:(d:validWord {return d})
                    {return [head, ...tail]}
                    )
   
-declareWeak = dependsOn [ \t]+ relationshipName:listOfDeps
+declareWeak = dependsOn _ relationshipName:listOfDeps
 { return {relationshipName}}
 // END WEAK ENTITY
 
@@ -117,7 +117,7 @@ declareComposite =
         childAttribs: listOfAttributes
     {return childAttribs}
 
-beginComposite = ':' [ \t]*
+beginComposite = ':' _0
 listOfAttributes =
     Lbracket
         attributes:(
@@ -167,10 +167,10 @@ relationShipAttribute "relationship attribute " = iden:validWord
 listOfParticipants =
     Lparen
     participants:(
-        pHead:([ \t]* p:(CompositeParticipantEntity/participantEntity)  {return p})
-        pTail:(','[ \t]* p:(CompositeParticipantEntity/participantEntity) {return p})*
+        pHead:(_0 p:(CompositeParticipantEntity/participantEntity)  {return p})
+        pTail:(_0','_0 p:(CompositeParticipantEntity/participantEntity) {return p})*
     {return [pHead, ...pTail]}
-    ) Rparen
+    ) _0 Rparen
     {return participants}
 
 
@@ -193,10 +193,10 @@ declareCompositeParticipantEntity =
 listOfChildParticipants =
     Lbracket
     participants:(
-        pHead:([ \t]* p:participantEntity {return p})
-        pTail:(','[ \t]* p:participantEntity {return p})*
+        pHead:(_0 p:participantEntity {return p})
+        pTail:(_0','_0 p:participantEntity {return p})*
     {return [pHead, ...pTail]}
-    ) Rbracket
+    ) _0 Rbracket
     {return participants}
 // end composite participant in relationship
 
@@ -228,7 +228,7 @@ cardinality = cardinality:(nums:[0-9]+{return nums.join('')} / [A-Z]) { return c
 declareTotalparticipation = isTotal:"!" { return true}
 
 // Aggregation
-aggregation = declareAggregation _ identifier:aggregationIdentifier _0 Lparen aggregatedRelationshipName:relationshipIdentifier Rparen
+aggregation = declareAggregation _ identifier:aggregationIdentifier _0 Lparen _0 aggregatedRelationshipName:relationshipIdentifier _0 Rparen
  (_0 Lcurly _0 Rcurly)?
 { return {
     type: "aggregation",
