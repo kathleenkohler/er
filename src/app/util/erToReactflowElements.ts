@@ -384,6 +384,7 @@ export const updateGraphElementsWithAggregation = ({
       label: aggregationName,
     },
     position,
+    style: { width: 500, height: 500 },
   });
 };
 
