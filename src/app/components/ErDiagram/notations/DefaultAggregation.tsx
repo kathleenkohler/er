@@ -12,25 +12,27 @@ const DefaultAggregation = ({
   // tailwind doesn't seem to update the width and height of the node when we change the props, so we use
   // inline styles.
   const nodeId = useNodeId();
-  const node = useStore((store) => (nodeId ? store.nodeInternals.get(nodeId) : null));
+  const node = useStore((store) =>
+    nodeId ? store.nodeInternals.get(nodeId) : null,
+  );
 
   return (
     <div className="relative">
-    <NodeResizer 
-      minWidth={300} 
-      minHeight={300}
-      handleStyle={{
-        width: "12px",
-        height: "12px",
-        backgroundColor: "blue",
-        borderRadius: "50%",
-      }}
-    />
+      <NodeResizer
+        minWidth={300}
+        minHeight={300}
+        handleStyle={{
+          width: "12px",
+          height: "12px",
+          backgroundColor: "blue",
+          borderRadius: "50%",
+        }}
+      />
 
       <div
         style={{
-          width: node?.width?? 500,
-          height: node?.height?? 500,
+          width: node?.width ?? 500,
+          height: node?.height ?? 500,
         }}
         className={`z-10 flex border-2 border-dashed border-sky-700 bg-sky-200/[.26] p-2`}
       >
