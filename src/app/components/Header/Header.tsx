@@ -9,6 +9,8 @@ import NewDiagramButton from "./NewDiagramButton";
 import LocaleSwitcher from "./LocaleSwitcher";
 import { ErDocChangeEvent } from "../../types/CodeEditor";
 import AboutButton from "./AboutButton";
+import { FaUser } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 const PROJECT_GITHUB = "https://github.com/matias-lg/er";
 
@@ -36,6 +38,7 @@ type HeaderProps = {
 export const Header = ({ onErDocChange }: HeaderProps) => {
   const t = useTranslations("home.header");
   const locale = useLocale();
+  const router = useRouter();
   const isSpanish = locale === "es";
 
   const DynamicExportButton = useMemo(
@@ -102,6 +105,11 @@ export const Header = ({ onErDocChange }: HeaderProps) => {
       <div className="ml-auto mr-0 flex h-full items-center">
         <AboutButton />
         <GitHubButton />
+        <button
+          className="flex items-center text-slate-400  hover:text-slate-300" 
+          onClick={() => router.push(`/${locale}/user`)}>
+          <FaUser className="inline mr-4 ml-1" />
+        </button>
       </div>
     </>
   );
