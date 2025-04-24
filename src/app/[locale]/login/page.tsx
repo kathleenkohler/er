@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import { useLocale } from "next-intl";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setClave] = useState("");
   const router = useRouter();
+  const locale = useLocale()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,9 +24,7 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
       if (!res.ok) throw new Error("Error al iniciar sesión");
-
-      const data = await res.json();
-      router.push("/user"); 
+      router.push(`/${locale}/user`); 
     } catch (error) {
       console.error(error);
     }
