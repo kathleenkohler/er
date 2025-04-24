@@ -42,6 +42,12 @@ export default function ERdocPlayground() {
 
     if (!user) return <div>Loading...</div>;
 
+    const handleLogout = async () => {
+        await fetch("/api/user/logout");
+        router.push(`/${locale}/login`);
+      };
+    
+
     return (
         <div className="flex h-screen bg-gray-100">
             <aside className="w-1/4 bg-gray-800 text-white p-4 relative">
@@ -65,7 +71,7 @@ export default function ERdocPlayground() {
                         <div className="absolute bottom-12 bg-white text-black rounded shadow-lg w-48 user-menu">
                             <p className="p-2 hover:bg-gray-100 cursor-pointer">Cambiar contraseña</p>
                             <p className="p-2 hover:bg-gray-100 cursor-pointer">Eliminar cuenta</p>
-                            <p className="p-2 hover:bg-gray-100 cursor-pointer">Cerrar sesión</p>
+                            <button onClick={handleLogout} className="p-2 hover:bg-gray-100 cursor-pointer"> Cerrar sesión </button>
                         </div>
                     )}
                 </div>
