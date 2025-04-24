@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "../../../../lib/mongodb";
 import { User } from "../../../../models/model";
 import bcrypt from "bcrypt";
+import { generarToken } from "../../../../lib/auth";
+import * as cookie from "cookie";
 
 export async function POST(req: Request) {
   try {
@@ -22,8 +24,20 @@ export async function POST(req: Request) {
     if (!isPasswordValid) {
       return NextResponse.json({ error: "Contraseña incorrecta" }, { status: 401 });
     }
+    const token = generarToken(usuario._id.toString());
 
-    return NextResponse.json({ mensaje: "Inicio de sesión con exitó" , usuario });
+    const response = NextResponse.json({ mensaje: "Inicio de sesión con exitó"});
+
+    response.headers.set(
+      "Set-Cookie",
+      cookie.serialize("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 36000,
+        path: "/",
+      })
+    );
+    return response;
     
   } catch (error) {
     console.error("Error al entrar a la cuenta:", error);
