@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 
 // import { MoreVertical, Share2, Trash, User } from 'lucide-react';
 
@@ -9,7 +10,17 @@ const DiagramList = ['Diagrama Proyecto', 'Diagrama Laboratorio'];
 
 export default function ERdocPlayground() {
     const [menuOpen, setMenuOpen] = useState(false);
+    const [user, setUser] = useState<any>(null);
     const router = useRouter();
+    const locale = useLocale()
+
+    useEffect(() => {
+        fetch('/api/user', {
+          credentials: 'include',
+        })
+          .then(res => res.json())
+          .then(setUser);
+      }, []);
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -29,6 +40,8 @@ export default function ERdocPlayground() {
         };
     }, []);
 
+    if (!user) return <div>Loading...</div>;
+
     return (
         <div className="flex h-screen bg-gray-100">
             <aside className="w-1/4 bg-gray-800 text-white p-4 relative">
@@ -36,11 +49,11 @@ export default function ERdocPlayground() {
                 <button className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4">+ Nuevo diagrama</button>
                 <div className="space-y-2">
                     <button className="hover:bg-gray-700 text-orange-400 p-2 rounded w-full text-left"
-                        onClick={() => router.push('/user')}>
+                        onClick={() => router.push(`/${locale}/user`)}>
                         Mis diagramas
                     </button>
                     <button className="hover:bg-gray-700 p-2 rounded w-full text-left" 
-                        onClick={() => router.push('/user/shared')}>
+                        onClick={() => router.push(`/${locale}/user/shared`)}>
                         Compartidos conmigo
                     </button>
                 </div>

@@ -8,7 +8,7 @@
     "src/**/**/**/*",
     "test/**/**/**/*",
     ".next/types/**/*.ts"
-  ],
+, "lib/mongodb.ts"  ],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
     /* Projects */
