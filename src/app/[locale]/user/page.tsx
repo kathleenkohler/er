@@ -11,6 +11,8 @@ const DiagramList = ['Diagrama Proyecto', 'Diagrama Laboratorio'];
 export default function ERdocPlayground() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [newDiagramName, setNewDiagramName] = useState('');
     const router = useRouter();
     const locale = useLocale()
 
@@ -47,12 +49,38 @@ export default function ERdocPlayground() {
         router.push(`/${locale}/login`);
       };
     
+    const handleCreateDiagram = async () => {
+        if (!newDiagramName.trim()) return;
+        console.log("enviando a api")
+        const res = await fetch('/api/diagram/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: newDiagramName }),
+            credentials: 'include',
+        });
+
+        if (res.ok) {
+            console.log("recibido")
+            const data = await res.json();
+            router.push(`/${locale}`)
+            // router.push(`/${locale}/${data.id}`); 
+        } else {
+            console.log("error en front")
+            console.error('Error creating diagram');
+        }
+    };
+
 
     return (
         <div className="flex h-screen bg-gray-100">
             <aside className="w-1/4 bg-gray-800 text-white p-4 relative">
                 <h1 className="text-2xl font-bold mb-10">ERdoc Playground</h1>
-                <button className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4">+ Nuevo diagrama</button>
+                <button className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4"
+                     onClick={() => setShowModal(true)}
+                    >+ Nuevo diagrama
+                 </button>
                 <div className="space-y-2">
                     <button className="hover:bg-gray-700 text-orange-400 p-2 rounded w-full text-left"
                         onClick={() => router.push(`/${locale}/user`)}>
@@ -94,6 +122,36 @@ export default function ERdocPlayground() {
                     </ul>
                 </div>
             </main>
+
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                    <div className="bg-white p-6 rounded-lg w-80">
+                        <h2 className="text-xl font-bold mb-4">Nombre del diagrama</h2>
+                        <input
+                            type="text"
+                            placeholder="Nombre del diagrama"
+                            value={newDiagramName}
+                            onChange={(e) => setNewDiagramName(e.target.value)}
+                            className="w-full p-2 border rounded mb-4"
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleCreateDiagram}
+                                className="bg-orange-400 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
+                            >
+                                Aceptar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }
