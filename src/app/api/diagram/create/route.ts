@@ -6,7 +6,6 @@ import { getUserId } from "../../../../../lib/getUserId";
 
 export async function POST(req: Request) {
   try {
-    console.log("api")
     const { name } = await req.json();
     await connectToDatabase();
     const userId = await getUserId();
@@ -48,16 +47,12 @@ export async function POST(req: Request) {
         }
       ]
     }, creator: userId, participants: []});
-    console.log(nuevoModelo);
     await nuevoModelo.save();
-    console.log("guardado");
 
     const response = NextResponse.json({ mensaje: "Diagrama creado"});
-
     return response;
     
   } catch (error) {
-    console.log("error en back")
     console.error("Error al entrar a la cuenta:", error);
     return NextResponse.json({ error: "Error al entrar a la cuenta" }, { status: 500 });
   }

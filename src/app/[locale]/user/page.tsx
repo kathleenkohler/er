@@ -6,11 +6,10 @@ import { useLocale } from 'next-intl';
 
 // import { MoreVertical, Share2, Trash, User } from 'lucide-react';
 
-const DiagramList = ['Diagrama Proyecto', 'Diagrama Laboratorio'];
-
 export default function ERdocPlayground() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
+    const [diagramList, setDiagramList] = useState<string[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [newDiagramName, setNewDiagramName] = useState('');
     const router = useRouter();
@@ -22,6 +21,16 @@ export default function ERdocPlayground() {
         })
           .then(res => res.json())
           .then(setUser);
+
+        fetch('/api/diagram/user', { 
+            credentials: 'include' 
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data)) {
+              setDiagramList(data.map(d => d.name));
+            }
+          });
       }, []);
 
     const toggleMenu = () => {
@@ -62,7 +71,6 @@ export default function ERdocPlayground() {
         });
 
         if (res.ok) {
-            console.log("recibido")
             const data = await res.json();
             router.push(`/${locale}`)
             // router.push(`/${locale}/${data.id}`); 
@@ -110,7 +118,7 @@ export default function ERdocPlayground() {
                 <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-l font-semibold mb-2 pb-2 border-b">Nombre</h2>
                     <ul>
-                        {DiagramList.map((diagram, index) => (
+                        {diagramList.map((diagram, index) => (
                             <li key={index} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded">
                                 {diagram}
                                 {/* <div className="flex gap-2">
