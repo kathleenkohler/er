@@ -6,10 +6,12 @@ import { useLocale } from 'next-intl';
 
 // import { MoreVertical, Share2, Trash, User } from 'lucide-react';
 
+type Diagram = { _id: string; name: string };
+
 export default function ERdocPlayground() {
     const [menuOpen, setMenuOpen] = useState(false);
     const [user, setUser] = useState<any>(null);
-    const [diagramList, setDiagramList] = useState<string[]>([]);
+    const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [newDiagramName, setNewDiagramName] = useState('');
     const router = useRouter();
@@ -28,7 +30,9 @@ export default function ERdocPlayground() {
           .then(res => res.json())
           .then(data => {
             if (Array.isArray(data)) {
-              setDiagramList(data.map(d => d.name));
+                setDiagramList(data);
+            } else {
+                setDiagramList([]);
             }
           });
       }, []);
@@ -60,7 +64,6 @@ export default function ERdocPlayground() {
     
     const handleCreateDiagram = async () => {
         if (!newDiagramName.trim()) return;
-        console.log("enviando a api")
         const res = await fetch('/api/diagram/create', {
             method: 'POST',
             headers: {
@@ -72,10 +75,8 @@ export default function ERdocPlayground() {
 
         if (res.ok) {
             const data = await res.json();
-            router.push(`/${locale}`)
-            // router.push(`/${locale}/${data.id}`); 
+            router.push(`/${locale}/${data.id}`); 
         } else {
-            console.log("error en front")
             console.error('Error creating diagram');
         }
     };
@@ -107,7 +108,7 @@ export default function ERdocPlayground() {
                         <div className="absolute bottom-12 bg-white text-black rounded shadow-lg w-48 user-menu">
                             <p className="p-2 hover:bg-gray-100 cursor-pointer">Cambiar contraseña</p>
                             <p className="p-2 hover:bg-gray-100 cursor-pointer">Eliminar cuenta</p>
-                            <button onClick={handleLogout} className="p-2 hover:bg-gray-100 cursor-pointer"> Cerrar sesión </button>
+                            <button onClick={handleLogout} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full"> Cerrar sesión </button>
                         </div>
                     )}
                 </div>
@@ -117,17 +118,20 @@ export default function ERdocPlayground() {
                 <h2 className="text-2xl font-semibold mb-4">Mis diagramas</h2>
                 <div className="bg-white p-4 rounded-lg shadow-md">
                 <h2 className="text-l font-semibold mb-2 pb-2 border-b">Nombre</h2>
+                {diagramList === null ? (
+                    <p className="text-gray-500">Cargando...</p>
+                ) : diagramList.length === 0 ? (
+                    <p className="text-gray-500">No tienes diagramas</p>
+                ) : (
                     <ul>
-                        {diagramList.map((diagram, index) => (
-                            <li key={index} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded">
-                                {diagram}
-                                {/* <div className="flex gap-2">
-                                    <Trash className="cursor-pointer" />
-                                    <Share2 className="cursor-pointer" />
-                                </div> */}
-                            </li>
+                        {diagramList.map((diagram) => (
+                        <li key={diagram._id} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
+                            onClick={() => router.push(`/${locale}/${diagram._id}`)}>
+                            {diagram.name}
+                        </li>
                         ))}
                     </ul>
+                )}
                 </div>
             </main>
 

@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     }, creator: userId, participants: []});
     await nuevoModelo.save();
 
-    const response = NextResponse.json({ mensaje: "Diagrama creado"});
+    const response = NextResponse.json({ id: nuevoModelo._id });
     return response;
     
   } catch (error) {
