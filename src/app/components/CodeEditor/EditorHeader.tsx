@@ -11,10 +11,12 @@ export const EditorHeader = ({
   editorRef,
   currentTheme,
   onToggleTheme,
+  modelName,
 }: {
   editorRef: MutableRefObject<editor.IStandaloneCodeEditor | null>;
   currentTheme: string;
   onToggleTheme: () => void;
+  modelName: string;
 }) => {
   const t = useTranslations("home.codeEditor.editorHeader");
 
@@ -24,8 +26,17 @@ export const EditorHeader = ({
       bg={colors.textEditorBackground}
       borderBottom={"1px"}
       borderBottomColor={"rgb(248 250 252 / 0.16)"}
-      className=" flex h-[26px] w-full flex-row items-center justify-end"
+      className=" flex h-[26px] w-full flex-row items-center justify-between"
     >
+      <Text
+        color="white"
+        fontSize="md"
+        className="max-w-[200px] truncate whitespace-nowrap overflow-hidden ml-4"
+      >
+        {modelName}
+      </Text>
+
+      <div className="flex">
       <HStack spacing={3}>
         <Text color="white" fontSize="sm">
           {t("toggleTheme")}
@@ -41,7 +52,6 @@ export const EditorHeader = ({
           }}
         />
       </HStack>
-      <div className="flex">
         <EditorButton
           icon={<BiSolidCopyAlt fill="#fff" />}
           label={t("copy")}
