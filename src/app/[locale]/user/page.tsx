@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaTrash } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
 
@@ -14,6 +14,8 @@ export default function ERdocPlayground() {
     const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [newDiagramName, setNewDiagramName] = useState('');
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
     const router = useRouter();
     const locale = useLocale()
 
@@ -125,9 +127,19 @@ export default function ERdocPlayground() {
                 ) : (
                     <ul>
                         {diagramList.map((diagram) => (
-                        <li key={diagram._id} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
-                            onClick={() => router.push(`/${locale}/${diagram._id}`)}>
-                            {diagram.name}
+                        <li key={diagram._id} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded">
+                            <span
+                                className="cursor-pointer flex-1"
+                                onClick={() => router.push(`/${locale}/${diagram._id}`)}
+                                >
+                                {diagram.name}
+                            </span>
+                            <FaTrash
+                                className="text-500 cursor-pointer ml-4"
+                                onClick={() => {
+                                    setDiagramToDelete(diagram);
+                                    setShowDeleteModal(true);
+                                }}/>
                         </li>
                         ))}
                     </ul>
@@ -162,6 +174,37 @@ export default function ERdocPlayground() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showDeleteModal && diagramToDelete && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded-lg w-96">
+                    <h2 className="text-xl font-bold mb-4">¿Eliminar diagrama?</h2>
+                    <p className="mb-4">¿Estás seguro de que deseas eliminar "{diagramToDelete.name}"?</p>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => setShowDeleteModal(false)}
+                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            onClick={async () => {
+                                await fetch(`/api/diagram/${diagramToDelete._id}`, {
+                                method: 'DELETE',
+                                credentials: 'include',
+                                });
+                                setDiagramList((prev) => prev?.filter(d => d._id !== diagramToDelete._id) ?? []);
+                                setShowDeleteModal(false);
+                                setDiagramToDelete(null);
+                            }} 
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        >
+                            Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
             )}
 
         </div>
