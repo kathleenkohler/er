@@ -22,6 +22,7 @@ const DEFAULT_EXAMPLE = "company";
 type ErrorReportingEditorProps = {
   onErDocChange: (evt: ErDocChangeEvent) => void;
   onErrorChange: (hasError: boolean) => void;
+  modelName: string;
 };
 
 const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
@@ -107,6 +108,7 @@ const LOCAL_STORAGE_EDITOR_CONTENT_KEY = "monaco-editor-content";
 const CodeEditor = ({
   onErDocChange,
   onErrorChange,
+  modelName,
 }: ErrorReportingEditorProps) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const thisEditor = useMonaco();
@@ -212,7 +214,8 @@ const CodeEditor = ({
       <EditorHeader 
         editorRef={editorRef}
         currentTheme={currentTheme}
-        onToggleTheme={toggleTheme} />
+        onToggleTheme={toggleTheme}
+        modelName={modelName} />
       <Box
         resize="none"
         pt={0}

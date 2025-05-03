@@ -20,6 +20,7 @@ const Page = () => {
   const monaco = useMonaco();
   const params = useParams();
   const modelId = params.modelId as string;
+  const [modelName, setModelName] = useState<string>("");
 
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
@@ -67,6 +68,7 @@ const Page = () => {
     fetch(`/api/diagram/${modelId}`)
       .then((res) => res.json())
       .then((model) => {
+        setModelName(model.name); 
         importJSON(model.json, monaco);
       })
       .catch((err) => {
@@ -90,6 +92,7 @@ const Page = () => {
             erDoc={erDoc}
             lastChange={lastChange}
             onErDocChange={onErDocChange}
+            modelName={modelName}
           />
         </div>
       </div>
