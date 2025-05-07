@@ -1,10 +1,8 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { FaUser, FaTrash } from 'react-icons/fa';
+import { FaUser, FaTrash, FaShareAlt } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import { useLocale } from 'next-intl';
-
-// import { MoreVertical, Share2, Trash, User } from 'lucide-react';
 
 type Diagram = { _id: string; name: string };
 
@@ -16,6 +14,9 @@ export default function ERdocPlayground() {
     const [newDiagramName, setNewDiagramName] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
+    const [shareModalOpen, setShareModalOpen] = useState(false);
+    const [diagramToShare, setDiagramToShare] = useState<Diagram | null>(null);
+    const [copiedMessageVisible, setCopiedMessageVisible] = useState(false);
     const router = useRouter();
     const locale = useLocale()
 
@@ -134,6 +135,13 @@ export default function ERdocPlayground() {
                                 >
                                 {diagram.name}
                             </span>
+                            <FaShareAlt
+                                className="text-500 cursor-pointer ml-4"
+                                onClick={() => {
+                                    setDiagramToShare(diagram);
+                                    setShareModalOpen(true);
+                                }}
+                                />
                             <FaTrash
                                 className="text-500 cursor-pointer ml-4"
                                 onClick={() => {
@@ -176,6 +184,47 @@ export default function ERdocPlayground() {
                 </div>
             )}
 
+            {shareModalOpen && diagramToShare && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
+                {copiedMessageVisible && (
+                    <div className="absolute top-2 right-2 bg-orange-100 text-orange-800 px-3 py-1 rounded shadow">
+                    ¡Copiado!
+                    </div>
+                )}
+                <h2 className="text-lg font-bold mb-4">Compartir diagrama</h2>
+                <p className="mb-2">Este es el enlace para compartir:</p>
+                <div className="flex items-center border rounded px-2 py-1 mb-4">
+                    <input
+                    type="text"
+                    readOnly
+                    value={`${window.location.origin}/${diagramToShare._id}`}
+                    className="flex-1 outline-none"
+                    />
+                    <button
+                    onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/${diagramToShare._id}`);
+                        setCopiedMessageVisible(true);
+                        setTimeout(() => setCopiedMessageVisible(false), 2000);
+                    }}
+                    className="ml-2 px-2 py-1 bg-orange-400 text-white font-bold rounded hover:bg-orange-600 text-sm"
+                    >
+                    Copiar
+                    </button>
+                </div>
+                <div className="flex justify-end gap-2">
+                    <button
+                        onClick={() => setShareModalOpen(false)}
+                        className="px-4 py-2 bg-gray-300 font-bold rounded hover:bg-gray-400"
+                    >
+                        Cerrar
+                    </button>
+                </div>
+                </div>
+            </div>
+            )}
+
+
             {showDeleteModal && diagramToDelete && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="bg-white p-6 rounded-lg w-96">
@@ -184,7 +233,7 @@ export default function ERdocPlayground() {
                     <div className="flex justify-end gap-2">
                         <button
                             onClick={() => setShowDeleteModal(false)}
-                            className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                            className="px-4 py-2 bg-gray-300 rounded font-bold hover:bg-gray-400"
                         >
                             Cancelar
                         </button>
@@ -198,7 +247,7 @@ export default function ERdocPlayground() {
                                 setShowDeleteModal(false);
                                 setDiagramToDelete(null);
                             }} 
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                            className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
                         >
                             Eliminar
                         </button>
