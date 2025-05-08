@@ -9,6 +9,8 @@ import { DiagramChange, ErDocChangeEvent } from "../../types/CodeEditor";
 import { ER } from "../../../ERDoc/types/parser/ER";
 import { useJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
+import { useRouter } from 'next/navigation';
+import { useLocale } from "next-intl";
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -19,8 +21,11 @@ const Page = () => {
 
   const monaco = useMonaco();
   const params = useParams();
+  const locale = useLocale();
+  const router = useRouter();
   const modelId = params.modelId as string;
   const [modelName, setModelName] = useState<string>("");
+  const [showJoinModal, setShowJoinModal] = useState(false);
 
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
@@ -64,16 +69,23 @@ const Page = () => {
 
   useEffect(() => {
     if (!modelId || !monaco) return;
-  
-    fetch(`/api/diagram/${modelId}`)
-      .then((res) => res.json())
-      .then((model) => {
-        setModelName(model.name); 
-        importJSON(model.json, monaco);
-      })
-      .catch((err) => {
-        console.error("Error fetching model:", err);
+    const fetchModel = async () => {
+      const res = await fetch(`/api/diagram/${modelId}`, {
+        credentials: "include"
       });
+      if (res.status === 401) {
+        router.push(`/${locale}/login`);
+        return;
+      }
+      const data = await res.json();
+      if (!data.isAuthorized) {
+        setShowJoinModal(true);
+      } else {
+        setModelName(data.model.name); 
+        importJSON(data.model.json, monaco);
+      }
+    };
+    fetchModel().catch((err) => console.error("Error fetching model:", err));;
   }, [modelId, monaco]);
 
   return (
@@ -96,6 +108,39 @@ const Page = () => {
           />
         </div>
       </div>
+      {showJoinModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Unirse al diagrama</h2>
+            <p className="mb-4">No formas parte de este modelo. ¿Quieres unirte?</p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+                onClick={() => router.push(`/${locale}/user`)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-orange-400 hover:bg-orange-600 text-white px-4 py-2 rounded"
+                onClick={async () => {
+                  const res = await fetch(`/api/diagram/${modelId}/join`, {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setModelName(data.model.name); 
+                    importJSON(data.model.json, monaco);
+                    setShowJoinModal(false)
+                  }
+                }}
+              >
+                Unirme
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Context.Provider>
   );
 };
