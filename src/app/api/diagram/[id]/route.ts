@@ -27,8 +27,21 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
     await connectToDatabase();
-    await Model.findByIdAndDelete(params.id);
-    return NextResponse.json({ message: 'Deleted' });
+    const userId = await getUserId();
+    if (!userId) return NextResponse.json({ error: "No existe un usuario" }, { status: 401 });
+
+    const model = await Model.findById(params.id);
+    if (!model) return NextResponse.json({ error: "Modelo no encontrado" }, { status: 404 });
+
+    if (model.creator.toString() === userId.toString()) {
+      await model.deleteOne();
+      return NextResponse.json({ message: "Modelo eliminado por el creador" });
+    }
+
+    model.participants = model.participants.filter((p: any) => p.toString() !== userId);
+    await model.save();
+    return NextResponse.json({ message: "Eliminado de los compartidos" });
+    
   } catch (error) {
     console.error("Error al eliminar el modelo:", error);
     return NextResponse.json({ error: "Error al eliminar el modelo" }, { status: 500 });
