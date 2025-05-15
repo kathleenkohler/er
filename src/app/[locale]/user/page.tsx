@@ -11,6 +11,7 @@ export default function ERdocPlayground() {
     const [user, setUser] = useState<any>(null);
     const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
     const [showModal, setShowModal] = useState(false);
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
     const [newDiagramName, setNewDiagramName] = useState('');
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
@@ -110,7 +111,10 @@ export default function ERdocPlayground() {
                     {menuOpen && (
                         <div className="absolute bottom-12 bg-white text-black rounded shadow-lg w-48 user-menu">
                             <p className="p-2 hover:bg-gray-100 cursor-pointer">Cambiar contraseña</p>
-                            <p className="p-2 hover:bg-gray-100 cursor-pointer">Eliminar cuenta</p>
+                            <button onClick={() => {setShowDeleteUserModal(true)}}
+                            className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
+                                Eliminar cuenta
+                            </button>
                             <button onClick={handleLogout} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full"> Cerrar sesión </button>
                         </div>
                     )}
@@ -250,6 +254,37 @@ export default function ERdocPlayground() {
                             className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
                         >
                             Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            )}
+
+            {showDeleteUserModal && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div className="bg-white p-6 rounded-lg w-96">
+                    <h2 className="text-xl font-bold mb-4">¿Eliminar cuenta?</h2>
+                    <p className="mb-4">¿Seguro que quieres eliminar tu cuenta? Esta acción es irreversible. 
+                        Perderás todos tus datos asociados a la cuenta y no podrás recuperarla.</p>
+                    <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => setShowDeleteUserModal(false)}
+                            className="px-4 py-2 bg-gray-300 rounded font-bold hover:bg-gray-400"
+                        >
+                            Cancelar
+                        </button>
+                        <button 
+                            onClick={async () => {
+                                await fetch(`/api/user`, {
+                                method: 'DELETE',
+                                credentials: 'include',
+                                });
+                                setShowDeleteUserModal(false);
+                                router.push(`/${locale}/login`);
+                            }} 
+                            className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
+                        >
+                            Eliminar cuenta
                         </button>
                     </div>
                 </div>
