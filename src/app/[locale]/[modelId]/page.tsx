@@ -29,16 +29,17 @@ const Page = () => {
   const [showJoinModal, setShowJoinModal] = useState(false);
   const saveRef = useRef<(id: string) => void>();
 
-  if (!saveRef.current) {
+ useEffect(() => {
+    if (!monaco) return;
     saveRef.current = debounce((id: string) => {
-      const editorValue = monaco?.editor.getModels()[0].getValue();
+      const editorValue = monaco.editor.getModels()[0].getValue();
       fetch(`/api/diagram/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ json: editorValue }),
       }).catch((err) => console.error("Error saving model:", err));
     }, 2000);
-  }
+  }, [monaco]);
   
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
