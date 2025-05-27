@@ -55,6 +55,18 @@ const Page = () => {
             JSON.stringify(currentErNoLoc) === JSON.stringify(newErNoLoc);
           return sameSemanticValue ? currentEr : er;
         });
+        if (modelId) {
+          const editorValue = monaco?.editor.getModels()[0].getValue();
+          fetch(`/api/diagram/${modelId}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ json: editorValue }),
+          }).catch((err) => {
+            console.error("Error saving model:", err);
+          });
+        }
         return;
       }
 

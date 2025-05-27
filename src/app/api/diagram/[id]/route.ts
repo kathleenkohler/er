@@ -47,3 +47,20 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: "Error al eliminar el modelo" }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
+    const body = await req.json();
+    const { json } = body;
+    await Model.findByIdAndUpdate(
+      params.id,
+      { [`json.erDoc`]: json },
+      { new: true }
+    );
+    return NextResponse.json({ message: "Actualizado" });
+  } catch (error){
+    console.error("Error al actualizar el modelo:", error);
+    return NextResponse.json({ error: "Error al actualizar el modelo" }, { status: 500 });
+  }
+}
