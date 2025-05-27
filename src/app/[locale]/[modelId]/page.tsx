@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Body from "../../components/Body";
 import Header from "../../components/Header/Header";
@@ -11,6 +11,7 @@ import { useJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
 import { useRouter } from 'next/navigation';
 import { useLocale } from "next-intl";
+import { debounce } from "lodash";
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -26,7 +27,19 @@ const Page = () => {
   const modelId = params.modelId as string;
   const [modelName, setModelName] = useState<string>("");
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const saveRef = useRef<(id: string) => void>();
 
+  if (!saveRef.current) {
+    saveRef.current = debounce((id: string) => {
+      const editorValue = monaco?.editor.getModels()[0].getValue();
+      fetch(`/api/diagram/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ json: editorValue }),
+      }).catch((err) => console.error("Error saving model:", err));
+    }, 2000);
+  }
+  
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
       case "json": {
@@ -56,16 +69,7 @@ const Page = () => {
           return sameSemanticValue ? currentEr : er;
         });
         if (modelId) {
-          const editorValue = monaco?.editor.getModels()[0].getValue();
-          fetch(`/api/diagram/${modelId}`, {
-            method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ json: editorValue }),
-          }).catch((err) => {
-            console.error("Error saving model:", err);
-          });
+          saveRef.current?.(modelId);
         }
         return;
       }
