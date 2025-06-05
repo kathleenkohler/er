@@ -1,17 +1,19 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import Body from "../../components/Body";
 import Header from "../../components/Header/Header";
 import { Context } from "../../context";
 import { erDocWithoutLocation } from "../../util/common";
 import { DiagramChange, ErDocChangeEvent } from "../../types/CodeEditor";
 import { ER } from "../../../ERDoc/types/parser/ER";
-import { useJSON } from "../../hooks/useJSON";
+import { useJSON, ErJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
 import { useRouter } from 'next/navigation';
 import { useLocale } from "next-intl";
 import { debounce } from "lodash";
+
+const Body = dynamic(() => import("../../components/Body"), { ssr: false });
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -28,11 +30,14 @@ const Page = () => {
   const [modelName, setModelName] = useState<string>("");
   const [showJoinModal, setShowJoinModal] = useState(false);
   const saveRef = useRef<(id: string) => void>();
+  const [initialJson, setInitialJson] = useState<ErJSON | null>(null);
 
  useEffect(() => {
     if (!monaco) return;
     saveRef.current = debounce((id: string) => {
-      const editorValue = monaco.editor.getModels()[0].getValue();
+      const editorModels = monaco.editor.getModels();
+      if (!editorModels?.length) return; 
+      const editorValue = editorModels[0].getValue();
       fetch(`/api/diagram/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -99,7 +104,7 @@ const Page = () => {
         setShowJoinModal(true);
       } else {
         setModelName(data.model.name); 
-        importJSON(data.model.json, monaco);
+        setInitialJson(data.model.json); 
       }
     };
     fetchModel().catch((err) => console.error("Error fetching model:", err));;
@@ -122,6 +127,8 @@ const Page = () => {
             lastChange={lastChange}
             onErDocChange={onErDocChange}
             modelName={modelName}
+            modelId={modelId}
+            initialJson={initialJson ?? null}
           />
         </div>
       </div>
@@ -147,7 +154,7 @@ const Page = () => {
                   if (res.ok) {
                     const data = await res.json();
                     setModelName(data.model.name); 
-                    importJSON(data.model.json, monaco);
+                    setInitialJson(data.model.json); 
                     setShowJoinModal(false)
                   }
                 }}

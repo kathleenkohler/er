@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
-import Body from "../components/Body";
+import dynamic from "next/dynamic";
+import { useMemo, useState } from "react";
 import Header from "../components/Header/Header";
 import { Context } from "../context";
 import { erDocWithoutLocation } from "../util/common";
 import { DiagramChange, ErDocChangeEvent } from "../types/CodeEditor";
 import { ER } from "../../ERDoc/types/parser/ER";
+
+const Body = dynamic(() => import("../components/Body"), { ssr: false });
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -14,6 +16,7 @@ const Page = () => {
 
   const [erDoc, setErDoc] = useState<ER | null>(null);
   const [lastChange, setLastChange] = useState<DiagramChange | null>(null);
+  const modelId = useMemo(() => crypto.randomUUID(), []);
 
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
@@ -69,6 +72,8 @@ const Page = () => {
             erDoc={erDoc}
             lastChange={lastChange}
             onErDocChange={onErDocChange}
+            modelName=""
+            modelId={modelId}
           />
         </div>
       </div>

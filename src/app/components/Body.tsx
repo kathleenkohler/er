@@ -1,20 +1,24 @@
 "use client";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ER } from "../../ERDoc/types/parser/ER";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import { DiagramChange, ErDocChangeEvent } from "../types/CodeEditor";
-import CodeEditor from "./CodeEditor/CodeEditor";
 import { ErDiagram } from "./ErDiagram/ErDiagram";
+import { ErJSON } from "../hooks/useJSON";
+const CodeEditor = dynamic(() => import("./CodeEditor/CodeEditor"), { ssr: false });
 
 type BodyProps = {
   erDoc: ER | null;
   onErDocChange: (evt: ErDocChangeEvent) => void;
   lastChange: DiagramChange | null;
   modelName: string;
+  modelId: string;
+  initialJson?: ErJSON | null;
 };
 
-const Body = ({ erDoc, lastChange, onErDocChange, modelName }: BodyProps) => {
+const Body = ({ erDoc, lastChange, onErDocChange, modelName, modelId, initialJson}: BodyProps) => {
   const [erDocHasError, setErDocHasError] = useState<boolean>(false);
   const [dragging, setDragging] = useState<boolean>(false);
   const { width } = useWindowDimensions();
@@ -32,6 +36,8 @@ const Body = ({ erDoc, lastChange, onErDocChange, modelName }: BodyProps) => {
             onErDocChange={onErDocChange}
             onErrorChange={setErDocHasError}
             modelName={modelName}
+            modelId={modelId}
+            initialJson={initialJson}
           />
         </div>
       </Panel>

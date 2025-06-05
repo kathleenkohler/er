@@ -3,6 +3,8 @@ import { useContext } from "react";
 import { useReactFlow } from "reactflow";
 import { Context } from "../context";
 import { ErDocChangeEvent } from "../types/CodeEditor";
+import * as Y from "yjs";
+import { replaceYText } from "../util/replaceYText";
 
 export type ErJSON = {
   erDoc: string;
@@ -68,13 +70,15 @@ export const useJSON = (onErDocChange: (evt: ErDocChangeEvent) => void) => {
 
   const importJSON = (
     json: ErJSON,
-    monacoInstance?: ReturnType<typeof useMonaco>,
+    options?: { monaco?: typeof monaco; yText?: Y.Text }
   ) => {
-    const editorText = json.erDoc;
-    // first, turn off auto layout
     setAutoLayoutEnabled(false);
-    // set the text in monaco
-    setModelValue(monacoInstance ?? monaco, editorText);
+
+    if (options?.yText) {
+      replaceYText(options.yText, json.erDoc);
+    } else if (options?.monaco) {
+      setModelValue(options.monaco, json.erDoc);
+    }
     onErDocChange({
       type: "json",
       positions: {

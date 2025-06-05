@@ -2,7 +2,7 @@ import { Box, Spinner, Button } from "@chakra-ui/react";
 import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import { editor, languages } from "monaco-types";
 import { useTranslations } from "next-intl";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getERDoc } from "../../../ERDoc";
 import {
   ErrorMessage,
@@ -15,7 +15,11 @@ import { EditorHeader } from "./EditorHeader";
 import ExamplesTable from "./ExamplesTable";
 import ErrorTable from "./ErrorTable";
 import { fetchExample } from "../../util/common";
-import { useJSON } from "../../hooks/useJSON";
+import { useJSON, ErJSON } from "../../hooks/useJSON";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
+import { replaceYText } from "../../util/replaceYText";
 
 const DEFAULT_EXAMPLE = "company";
 
@@ -23,6 +27,8 @@ type ErrorReportingEditorProps = {
   onErDocChange: (evt: ErDocChangeEvent) => void;
   onErrorChange: (hasError: boolean) => void;
   modelName: string;
+  modelId: string;
+  initialJson?: ErJSON | null;
 };
 
 const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
@@ -109,6 +115,8 @@ const CodeEditor = ({
   onErDocChange,
   onErrorChange,
   modelName,
+  modelId,
+  initialJson,
 }: ErrorReportingEditorProps) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const thisEditor = useMonaco();
@@ -116,6 +124,8 @@ const CodeEditor = ({
   const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
   const { importJSON } = useJSON(onErDocChange);
   const [currentTheme, setCurrentTheme] = useState(DEFAULT_THEME);
+  const providerRef = useRef<WebsocketProvider>();
+  const yTextRef = useRef<Y.Text | null>(null);
 
   const toggleTheme = () => {
     const newTheme =
@@ -178,20 +188,54 @@ const CodeEditor = ({
 
   const handleEditorMount: OnMount = (editor, monacoInstance) => {
     editorRef.current = editor;
-    const prevContent = localStorage.getItem(LOCAL_STORAGE_EDITOR_CONTENT_KEY);
-    if (prevContent === null) {
-      // load an example from api
-      fetchExample(DEFAULT_EXAMPLE)
-        .then((example) => {
-          if (example) {
-            importJSON(example, monacoInstance);
-          }
-        })
-        .catch((err) => console.error(err));
-    } else {
-      editor.setValue(prevContent);
-      handleEditorContent(prevContent, monacoInstance);
-    }
+    const ydoc  = new Y.Doc();
+    const yText = ydoc.getText("code");
+    yTextRef.current = yText;    
+
+    const provider = new WebsocketProvider(
+      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234",
+      modelId,
+      ydoc
+    );
+    //provider.awareness.setLocalStateField("user", { name: "currentUser" });
+    const monacoModel = editor.getModel()!;
+    new MonacoBinding(yText, monacoModel, new Set([editor]), provider.awareness);
+
+    const loadInitial = async () => {
+      const yText = yTextRef.current!;
+      if (yText.length > 0) return;   
+
+      let stored = localStorage.getItem(LOCAL_STORAGE_EDITOR_CONTENT_KEY);
+      if (stored) {
+        replaceYText(yText, stored);
+        return;
+      }
+
+      try {
+        const example = await fetchExample(DEFAULT_EXAMPLE);
+        if (example) {
+          importJSON(example, { yText: yTextRef.current! });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    provider.once("sync", async (isSynced: boolean) => {
+      if (!isSynced) return;
+
+      const yText = yTextRef.current!;
+      if (yText.length > 0) return;
+
+      if (initialJson) {
+        importJSON(initialJson, { yText });
+      } else {
+        await loadInitial(); 
+      }
+    });
+
+    providerRef.current = provider;
+    
     // mount erdoc language
     monacoInstance.languages.register({ id: "erdoc" });
     monacoInstance.languages.setMonarchTokensProvider("erdoc", erdocTokenizer);
@@ -202,6 +246,13 @@ const CodeEditor = ({
     }
     monacoInstance.editor.setTheme(currentTheme);
   };
+
+  useEffect(() => {
+    return () => {
+      providerRef.current?.destroy();
+      yTextRef.current?.doc?.destroy();
+    };
+  }, []);
 
   return (
     <Box
