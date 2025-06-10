@@ -4,7 +4,6 @@ import { useReactFlow } from "reactflow";
 import { Context } from "../context";
 import { ErDocChangeEvent } from "../types/CodeEditor";
 import * as Y from "yjs";
-import { replaceYText } from "../util/replaceYText";
 
 export type ErJSON = {
   erDoc: string;
@@ -70,15 +69,11 @@ export const useJSON = (onErDocChange: (evt: ErDocChangeEvent) => void) => {
 
   const importJSON = (
     json: ErJSON,
-    options?: { monaco?: typeof monaco; yText?: Y.Text }
+    monacoInstance?: ReturnType<typeof useMonaco>,
   ) => {
+    const editorText = json.erDoc;
     setAutoLayoutEnabled(false);
-
-    if (options?.yText) {
-      replaceYText(options.yText, json.erDoc);
-    } else if (options?.monaco) {
-      setModelValue(options.monaco, json.erDoc);
-    }
+    setModelValue(monacoInstance ?? monaco, editorText);
     onErDocChange({
       type: "json",
       positions: {
@@ -88,7 +83,27 @@ export const useJSON = (onErDocChange: (evt: ErDocChangeEvent) => void) => {
     });
   };
 
-  return { exportToJSON, importJSON };
+  const importJSONColaborative = (json: ErJSON,  ydoc: Y.Doc) => {
+    const editorText = json.erDoc;
+    setAutoLayoutEnabled(false); 
+
+    const yText = ydoc.getText("monaco");
+
+    if (yText.toString().length === 0) {
+      yText.delete(0, yText.length);
+      yText.insert(0, editorText);
+    }
+
+    onErDocChange({
+      type: "json",
+      positions: {
+        nodes: json.nodes,
+        edges: json.edges,
+      },
+    });
+  };
+
+  return { exportToJSON, importJSON, importJSONColaborative };
 };
 
 const setModelValue = (

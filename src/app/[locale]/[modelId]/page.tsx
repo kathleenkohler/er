@@ -7,13 +7,14 @@ import { Context } from "../../context";
 import { erDocWithoutLocation } from "../../util/common";
 import { DiagramChange, ErDocChangeEvent } from "../../types/CodeEditor";
 import { ER } from "../../../ERDoc/types/parser/ER";
-import { useJSON, ErJSON } from "../../hooks/useJSON";
+import { useJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
 import { useRouter } from 'next/navigation';
 import { useLocale } from "next-intl";
 import { debounce } from "lodash";
-
-const Body = dynamic(() => import("../../components/Body"), { ssr: false });
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+const Body = dynamic(() => import( "../../components/BodyColab"), { ssr: false });
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -30,7 +31,9 @@ const Page = () => {
   const [modelName, setModelName] = useState<string>("");
   const [showJoinModal, setShowJoinModal] = useState(false);
   const saveRef = useRef<(id: string) => void>();
-  const [initialJson, setInitialJson] = useState<ErJSON | null>(null);
+  const ydocRef = useRef<Y.Doc>();
+  const providerRef = useRef<WebsocketProvider>();
+  const [ydocReady, setYdocReady] = useState(false);
 
  useEffect(() => {
     if (!monaco) return;
@@ -87,11 +90,26 @@ const Page = () => {
     }
   };
 
-  const { importJSON } = useJSON(onErDocChange);
+  const { importJSONColaborative } = useJSON(onErDocChange);
 
   useEffect(() => {
-    if (!modelId || !monaco) return;
-    const fetchModel = async () => {
+    const ydoc = new Y.Doc();
+    ydocRef.current = ydoc;
+
+    const provider = new WebsocketProvider(
+      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234",
+      modelId,
+      ydoc
+    );
+    providerRef.current = provider;
+
+    provider.on("status", ({ status }) => {
+      console.log("WebSocket status:", status);
+    });
+
+    provider.on("sync", async (isSynced: boolean) => {
+      if (!isSynced) return;
+
       const res = await fetch(`/api/diagram/${modelId}`, {
         credentials: "include"
       });
@@ -99,16 +117,34 @@ const Page = () => {
         router.push(`/${locale}/login`);
         return;
       }
+      if (res.status === 500) {
+        router.push(`/${locale}`);
+        return;
+      }
       const data = await res.json();
       if (!data.isAuthorized) {
         setShowJoinModal(true);
-      } else {
-        setModelName(data.model.name); 
-        setInitialJson(data.model.json); 
+        return;
       }
+
+      setModelName(data.model.name);
+
+      const yText = ydoc.getText("monaco");
+
+      if (yText.length === 0) {
+        yText.insert(0, data.model.json.erDoc);
+      }
+      importJSONColaborative(data.model.json, ydoc);
+    });
+
+    setYdocReady(true);
+
+    return () => {
+      provider.destroy();
+      ydoc.destroy();
     };
-    fetchModel().catch((err) => console.error("Error fetching model:", err));;
-  }, [modelId, monaco]);
+  }, [modelId]);
+
 
   return (
     <Context.Provider
@@ -122,14 +158,16 @@ const Page = () => {
           <Header onErDocChange={onErDocChange} />
         </div>
         <div className="h-[90%] w-full min-[1340px]:h-[95%]">
+          { ydocReady && (
           <Body
             erDoc={erDoc}
             lastChange={lastChange}
             onErDocChange={onErDocChange}
             modelName={modelName}
-            modelId={modelId}
-            initialJson={initialJson ?? null}
+            ydoc={ydocRef.current!}
+            provider={providerRef.current!}
           />
+          )}
         </div>
       </div>
       {showJoinModal && (
@@ -154,7 +192,7 @@ const Page = () => {
                   if (res.ok) {
                     const data = await res.json();
                     setModelName(data.model.name); 
-                    setInitialJson(data.model.json); 
+                    importJSONColaborative(data.model.json, ydocRef.current!);
                     setShowJoinModal(false)
                   }
                 }}
