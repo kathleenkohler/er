@@ -44,7 +44,7 @@ const Page = () => {
       fetch(`/api/diagram/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ json: editorValue }),
+        body: JSON.stringify({ json: editorValue, source: "code" }),
       }).catch((err) => console.error("Error saving model:", err));
     }, 2000);
   }, [monaco]);

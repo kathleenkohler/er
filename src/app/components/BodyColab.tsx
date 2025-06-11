@@ -5,7 +5,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { ER } from "../../ERDoc/types/parser/ER";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import { DiagramChange, ErDocChangeEvent } from "../types/CodeEditor";
-import { ErDiagram } from "./ErDiagram/ErDiagram";
+import { ErDiagram } from "./ErDiagram/ErDiagramColab";
 import type * as Y from "yjs";
 import type { WebsocketProvider } from "y-websocket";
 
