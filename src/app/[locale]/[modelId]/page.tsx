@@ -130,6 +130,8 @@ const Page = () => {
       setModelName(data.model.name);
 
       const yText = ydoc.getText("monaco");
+      const yNodesMap = ydoc.getMap("nodesMap");
+      const yEdgesMap = ydoc.getMap("edgesMap");
 
       if (yText.length === 0) {
         yText.insert(0, data.model.json.erDoc);
@@ -166,6 +168,8 @@ const Page = () => {
             modelName={modelName}
             ydoc={ydocRef.current!}
             provider={providerRef.current!}
+            yNodesMap={ydocRef.current!.getMap("nodesMap")}
+            yEdgesMap={ydocRef.current!.getMap("edgesMap")}
           />
           )}
         </div>

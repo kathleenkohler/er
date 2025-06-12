@@ -27,6 +27,7 @@ import { useTranslations } from "next-intl";
 import { DiagramChange } from "../../types/CodeEditor";
 import { useParams } from "next/navigation";
 import debounce from "lodash/debounce";
+import * as Y from "yjs";
 
 type ErDiagramProps = {
   erDoc: ER;
@@ -37,16 +38,25 @@ type ErDiagramProps = {
   setEdgesOrthogonal: (isOrthogonal: boolean) => void;
   onNotationChange: (newNotationType: NotationTypes) => void;
   erEdgeNotation: ErNotation["edgeMarkers"];
+  ydoc: Y.Doc;
+	yNodesMap: Y.Map<ErNode>;
+  yEdgesMap: Y.Map<Edge>;
 };
 
 const NotationSelectorErDiagramWrapper = ({
   erDoc,
   erDocHasError,
   lastChange,
+  ydoc,
+	yNodesMap,
+	yEdgesMap
 }: {
   erDoc: ER;
   lastChange: DiagramChange | null;
   erDocHasError: boolean;
+  ydoc: Y.Doc;
+	yNodesMap: Y.Map<ErNode>;
+	yEdgesMap: Y.Map<Edge>;
 }) => {
   const [edgesOrthogonal, setEdgesOrthogonal] = useState<boolean>(false);
   const [notationType, setNotationType] = useState<NotationTypes>("arrow");
@@ -65,6 +75,9 @@ const NotationSelectorErDiagramWrapper = ({
       notationType={notationType}
       onNotationChange={(newNotationType) => setNotationType(newNotationType)}
       setEdgesOrthogonal={setEdgesOrthogonal}
+      ydoc={ydoc}
+			yNodesMap={yNodesMap}
+      yEdgesMap={yEdgesMap}
     />
   );
 };
@@ -77,6 +90,9 @@ const ErDiagram = ({
   lastChange,
   onNotationChange,
   setEdgesOrthogonal,
+  ydoc,
+  yNodesMap,
+  yEdgesMap,
 }: ErDiagramProps) => {
   const t = useTranslations("home.erDiagram");
   const erNodeTypes = useMemo(() => notation.nodeTypes, [notation]);
@@ -99,10 +115,48 @@ const ErDiagram = ({
 	const modelId = params.modelId as string;
 
   useEffect(() => {
+    const updateNodes = () => {
+      const allNodes = Array.from(yNodesMap.values());
+      setNodes(allNodes);
+    };
+    const updateEdges = () => {
+      const allEdges = Array.from(yEdgesMap.values());
+      setEdges(allEdges);
+    };
+    yNodesMap.observe(updateNodes);
+    yEdgesMap.observe(updateEdges);
+    updateNodes();
+    updateEdges();
+
+  return () => {
+    yNodesMap.unobserve(updateNodes);
+    yEdgesMap.unobserve(updateEdges);
+  };
+  }, []);
+
+  const syncYMapWithNodes = (nodes: ErNode[]) => {
+    ydoc.transact(() => {
+      yNodesMap.clear(); 
+      nodes.forEach((node) => {
+        yNodesMap.set(node.id, node);
+      });
+    });
+  };
+
+  const syncYMapWithEdges = (edges: Edge[]) => {
+    ydoc.transact(() => {
+      yEdgesMap.clear();
+      edges.forEach((edge) => {
+        yEdgesMap.set(edge.id, edge);
+      });
+    });
+  };
+
+  useEffect(() => {
     if (lastChange?.type === "json" || lastChange?.type === "localStorage") {
       const nodePositions = lastChange.positions.nodes;
       setNodes((nodes) => {
-        return nodes.map((node) => {
+        const updatedNodes = nodes.map((node) => {
           const savedNode = nodePositions.find((n) => n.id === node.id);
           if (savedNode) {
             return {
@@ -111,6 +165,8 @@ const ErDiagram = ({
             };
           } else return node;
         });
+        syncYMapWithNodes(updatedNodes as ErNode[]);
+        return updatedNodes;
       });
       setTimeout(saveToLocalStorage, 100);
     }
@@ -129,8 +185,7 @@ const ErDiagram = ({
     // @ts-ignore
     setNodes((nodes) => {
       const alreadyExists: string[] = [];
-      return (
-        nodes
+      const updatedNodes = nodes
           // if the node already exists, keep its position
           .map((oldNode) => {
             let newNode = fromErNodes.find(
@@ -163,12 +218,13 @@ const ErDiagram = ({
                 style: { ...newNode.style, opacity: hideItems ? 0 : 1 },
               })),
           )
-      );
+      syncYMapWithNodes(updatedNodes);
+      return updatedNodes;
     });
 
     setEdges((oldEdges) => {
       const alreadyExists: string[] = [];
-      return oldEdges
+      const updatedEdges = oldEdges
         .map((oldEdge) => {
           const updatedEdge = fromErEdges.find((ne) => ne.id === oldEdge.id);
           if (updatedEdge) alreadyExists.push(updatedEdge.id);
@@ -180,6 +236,8 @@ const ErDiagram = ({
             .map((e) => ({ ...e, hidden: hideItems ? true : false })),
         )
         .filter((e) => e !== undefined) as Edge[];
+        syncYMapWithEdges(updatedEdges);
+        return updatedEdges;
     });
     setTimeout(saveToLocalStorage, 100);
   }
@@ -209,6 +267,15 @@ const ErDiagram = ({
   };
 
   const onNodeDragStopHandler: NodeDragHandler = (e, node, nodes) => {
+    ydoc.transact(() => {
+      const existing = yNodesMap.get(node.id);
+      if (existing) {
+        yNodesMap.set(node.id, {
+          ...existing,
+          position: node.position
+        });
+      }
+    });
     saveToLocalStorage();
     onNodeDragStop(e, node, nodes);
   };

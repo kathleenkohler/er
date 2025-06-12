@@ -18,9 +18,11 @@ type BodyProps = {
   modelName: string;
   ydoc: Y.Doc;
   provider: WebsocketProvider;
+  yNodesMap: any
+  yEdgesMap: any
 };
 
-const Body = ({ erDoc, lastChange, onErDocChange, modelName, ydoc, provider }: BodyProps) => {
+const Body = ({ erDoc, lastChange, onErDocChange, modelName, ydoc, provider, yNodesMap, yEdgesMap }: BodyProps) => {
   const [erDocHasError, setErDocHasError] = useState<boolean>(false);
   const [dragging, setDragging] = useState<boolean>(false);
   const { width } = useWindowDimensions();
@@ -59,6 +61,9 @@ const Body = ({ erDoc, lastChange, onErDocChange, modelName, ydoc, provider }: B
             erDoc={erDoc!}
             erDocHasError={erDocHasError}
             lastChange={lastChange}
+            ydoc={ydoc}
+            yNodesMap={yNodesMap}
+            yEdgesMap={yEdgesMap}
           />
         </div>
       </Panel>
