@@ -136,18 +136,40 @@ const ErDiagram = ({
 
   const syncYMapWithNodes = (nodes: ErNode[]) => {
     ydoc.transact(() => {
-      yNodesMap.clear(); 
+      const currentKeys = new Set(yNodesMap.keys());
+      const newKeys = new Set(nodes.map(n => n.id));
+
       nodes.forEach((node) => {
-        yNodesMap.set(node.id, node);
+        const existing = yNodesMap.get(node.id);
+        if (!existing || JSON.stringify(existing) !== JSON.stringify(node)) {
+          yNodesMap.set(node.id, node);
+        }
+      });
+
+      currentKeys.forEach((key) => {
+        if (!newKeys.has(key)) {
+          yNodesMap.delete(key);
+        }
       });
     });
   };
 
   const syncYMapWithEdges = (edges: Edge[]) => {
     ydoc.transact(() => {
-      yEdgesMap.clear();
+      const currentKeys = new Set(yEdgesMap.keys());
+      const newKeys = new Set(edges.map(n => n.id));
+
       edges.forEach((edge) => {
-        yEdgesMap.set(edge.id, edge);
+        const existing = yEdgesMap.get(edge.id);
+        if (!existing || JSON.stringify(existing) !== JSON.stringify(edge)) {
+          yEdgesMap.set(edge.id, edge);
+        }
+      });
+
+      currentKeys.forEach((key) => {
+        if (!newKeys.has(key)) {
+          yEdgesMap.delete(key);
+        }
       });
     });
   };
