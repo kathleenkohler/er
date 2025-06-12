@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware({
   defaultLocale: "en",
 });
 
-const protectedRoutes = ['/user', '/user/shared', '/es/user', '/es/user/shared']
+const protectedRoutes = ['/user', '/user/shared', '/user/change-password', '/es/user', '/es/user/shared', '/es/user/change-password' ]
 const publicRoutes = ['/login', '/register', '/es/login', '/es/register']
 
 async function verificarToken(token: string) {
