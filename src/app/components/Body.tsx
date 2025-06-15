@@ -11,9 +11,10 @@ type BodyProps = {
   erDoc: ER | null;
   onErDocChange: (evt: ErDocChangeEvent) => void;
   lastChange: DiagramChange | null;
+  modelName: string;
 };
 
-const Body = ({ erDoc, lastChange, onErDocChange }: BodyProps) => {
+const Body = ({ erDoc, lastChange, onErDocChange, modelName }: BodyProps) => {
   const [erDocHasError, setErDocHasError] = useState<boolean>(false);
   const [dragging, setDragging] = useState<boolean>(false);
   const { width } = useWindowDimensions();
@@ -30,6 +31,7 @@ const Body = ({ erDoc, lastChange, onErDocChange }: BodyProps) => {
           <CodeEditor
             onErDocChange={onErDocChange}
             onErrorChange={setErDocHasError}
+            modelName={modelName}
           />
         </div>
       </Panel>
