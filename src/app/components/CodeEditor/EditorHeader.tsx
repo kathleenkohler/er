@@ -47,7 +47,8 @@ export const EditorHeader = ({
           size="sm"
           sx={{
             "& .chakra-switch__track": {
-              backgroundColor: currentTheme === "onedark" ? "#c678dd" : "#cbd5e0",
+              backgroundColor:
+                currentTheme === "onedark" ? "#c678dd" : "#cbd5e0",
             },
           }}
         />

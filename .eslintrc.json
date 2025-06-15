@@ -1,15 +1,8 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:prettier/recommended"
-  ],
-  "plugins": [
-    "prettier"
-  ],
+  "extends": ["next/core-web-vitals", "plugin:prettier/recommended"],
+  "plugins": ["prettier"],
   "rules": {
     "prettier/prettier": "error"
   },
-  "ignorePatterns": [
-    "src/ERDoc/parser/peggy/generated.js"
-  ]
+  "ignorePatterns": ["src/ERDoc/parser/peggy/generated.js"]
 }

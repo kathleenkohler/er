@@ -37,7 +37,7 @@ const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
           { token: "string", foreground: "#98c379" },
         ],
         colors: {
-          "editor.background":  "#21252b",
+          "editor.background": "#21252b",
         },
       },
     ],
@@ -211,11 +211,12 @@ const CodeEditor = ({
       flexDir={"column"}
       overflow={"hidden"}
     >
-      <EditorHeader 
+      <EditorHeader
         editorRef={editorRef}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
-        modelName={modelName} />
+        modelName={modelName} 
+       />
       <Box
         resize="none"
         pt={0}
