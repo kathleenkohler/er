@@ -47,3 +47,34 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: "Error al eliminar el modelo" }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  try {
+    await connectToDatabase();
+    const body = await req.json();
+    const { json, source } = body;
+    if (source == "code"){
+      await Model.findByIdAndUpdate(
+      params.id,
+      { [`json.erDoc`]: json },
+      { new: true }
+    );
+    }
+    if (source == "diagram"){
+      await Model.findByIdAndUpdate(
+      params.id,
+      { [`json.nodes`]: json.nodesJSON },
+      { new: true }
+      );
+      await Model.findByIdAndUpdate(
+      params.id,
+      { [`json.edges`]: json.edgesJSON },
+      { new: true }
+    );
+    }
+    return NextResponse.json({ message: "Actualizado" });
+  } catch (error){
+    console.error("Error al actualizar el modelo:", error);
+    return NextResponse.json({ error: "Error al actualizar el modelo" }, { status: 500 });
+  }
+}

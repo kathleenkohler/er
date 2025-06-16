@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ErJSON, useJSON } from "../../hooks/useJSON";
 import { fetchExample } from "../../util/common";
 import { ErDocChangeEvent } from "../../types/CodeEditor";
+import { useRouter } from "next/navigation";
 
 type ExamplesTableProps = {
   onErDocChange: (evt: ErDocChangeEvent) => void;
@@ -23,18 +24,18 @@ const ExamplesTable = ({ onErDocChange }: ExamplesTableProps) => {
 
   const { importJSON } = useJSON(onErDocChange);
   const t = useTranslations("home.examples");
+  const router = useRouter();
 
   const onExampleClickHandler = (exampleName: string) => {
     if (cachedExample !== null && cachedExample.name === exampleName) {
-      importJSON(cachedExample.data);
-      return;
+      router.push(`/?example=${exampleName}`);
     }
 
     fetchExample(exampleName)
       .then((example) => {
         if (example) {
           setCachedExample({ name: exampleName, data: example });
-          importJSON(example);
+          router.push(`/?example=${exampleName}`);
         }
       })
       .catch((err) => console.error(err));

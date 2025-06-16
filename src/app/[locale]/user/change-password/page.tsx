@@ -1,34 +1,52 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import { FaTrash, FaUser } from 'react-icons/fa';
+"use client";
+import { useEffect, useState } from "react";
+import { FaUser } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale } from "next-intl";
 
-type Diagram = { _id: string; name: string };
-
-export default function ERdocPlayground() {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
-    const [newDiagramName, setNewDiagramName] = useState('');
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
-    const router = useRouter();
+export default function ChangePasswordForm() {
+    
     const locale = useLocale();
+    const router = useRouter();
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [newDiagramName, setNewDiagramName] = useState('');
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
-     useEffect(() => {
-        fetch('/api/diagram/user/shared', { 
-            credentials: 'include' 
-        }).then(res => res.json())
-          .then(data => {
-            if (Array.isArray(data)) {
-                setDiagramList(data);
-            } else {
-                setDiagramList([]);
-            }
-            });
-        }, []);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        if (newPassword !== confirmNewPassword) {
+            setError("Las contraseñas nuevas no coinciden.");
+            return;
+        }
+
+        const res = await fetch("/api/user/change-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            setError(data.error || "Error al cambiar la contraseña.");
+        } else {
+            setSuccess("Contraseña actualizada correctamente.");
+            setCurrentPassword("");
+            setNewPassword("");
+            setConfirmNewPassword("");
+            setTimeout(() => setSuccess(""), 2000);
+        }
+    };
 
     const toggleMenu = () => {
         setMenuOpen(!menuOpen);
@@ -48,11 +66,6 @@ export default function ERdocPlayground() {
         };
     }, []);
 
-    const handleLogout = async () => {
-        await fetch("/api/user/logout");
-        router.push(`/${locale}/login`);
-      };
-    
     const handleCreateDiagram = async () => {
         if (!newDiagramName.trim()) return;
         const res = await fetch('/api/diagram/create', {
@@ -72,20 +85,26 @@ export default function ERdocPlayground() {
         }
     };
 
+    const handleLogout = async () => {
+        await fetch("/api/user/logout");
+        router.push(`/${locale}/login`);
+      };
+
+  
     return (
         <div className="flex h-screen bg-gray-100">
             <aside className="w-1/4 bg-gray-800 text-white p-4 relative">
                 <h1 className="text-2xl font-bold mb-10">ERdoc Playground</h1>
                 <button className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4"
-                     onClick={() => setShowModal(true)}
+                    onClick={() => setShowModal(true)}
                     >+ Nuevo diagrama
-                 </button>
+                </button>
                 <div className="space-y-2">
                     <button className="hover:bg-gray-700 p-2 rounded w-full text-left"
                         onClick={() => router.push(`/${locale}/user`)}>
                         Mis diagramas
                     </button>
-                    <button className="hover:bg-gray-700 p-2 rounded w-full text-left text-orange-400" 
+                    <button className="hover:bg-gray-700 p-2 rounded w-full text-left" 
                         onClick={() => router.push(`/${locale}/user/shared`)}>
                         Compartidos conmigo
                     </button>
@@ -100,7 +119,7 @@ export default function ERdocPlayground() {
                                 Cambiar contraseña
                             </button>
                             <button onClick={() => {setShowDeleteUserModal(true)}}
-                                className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
+                            className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
                                 Eliminar cuenta
                             </button>
                             <button onClick={handleLogout} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full"> Cerrar sesión </button>
@@ -110,35 +129,45 @@ export default function ERdocPlayground() {
             </aside>
 
             <main className="w-3/4 p-8">
-                <h2 className="text-2xl font-semibold mb-4">Compartidos conmigo</h2>
-                <div className="bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-l font-semibold mb-2 pb-2 border-b">Nombre</h2>
-                    {diagramList === null ? (
-                        <p className="text-gray-500">Cargando...</p>
-                    ) : diagramList.length === 0 ? (
-                        <p className="text-gray-500">No tienes diagramas compartidos</p>
-                    ) : (
-                        <ul>
-                            {diagramList.map((diagram) => (
-                            <li key={diagram._id} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded">
-                                <span
-                                    className="cursor-pointer flex-1"
-                                    onClick={() => router.push(`/${locale}/${diagram._id}`)}
-                                    >
-                                    {diagram.name}
-                                </span>
-                                <FaTrash
-                                    className="text-500 cursor-pointer ml-4"
-                                    onClick={() => {
-                                        setDiagramToDelete(diagram);
-                                        setShowDeleteModal(true);
-                                    }}/>
-                            </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
+                <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-10 space-y-4">
+                <h2 className="text-2xl font-semibold mb-4">Cambiar contraseña</h2>
+                
+                <input
+                    type="password"
+                    placeholder="Contraseña actual"
+                    className="w-full p-2 border rounded"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Nueva contraseña"
+                    className="w-full p-2 border rounded"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                />
+                <input
+                    type="password"
+                    placeholder="Confirmar nueva contraseña"
+                    className="w-full p-2 border rounded"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                />
+
+                {error && <p className="text-red-500">{error}</p>}
+                {success && <p className="text-green-500">{success}</p>}
+
+                <button type="submit"
+                    className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4"
+                >
+                    Confirmar cambio
+                </button>
+                </form>
             </main>
+
             {showModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white p-6 rounded-lg w-80">
@@ -167,38 +196,8 @@ export default function ERdocPlayground() {
                     </div>
                 </div>
             )}
-             {showDeleteModal && diagramToDelete && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                <div className="bg-white p-6 rounded-lg w-96">
-                    <h2 className="text-xl font-bold mb-4">¿Eliminar diagrama compartido?</h2>
-                    <p className="mb-4">¿Estás seguro de que deseas salir del diagrama "{diagramToDelete.name}"?</p>
-                    <div className="flex justify-end gap-2">
-                        <button
-                            onClick={() => setShowDeleteModal(false)}
-                            className="px-4 py-2 bg-gray-300 rounded font-bold hover:bg-gray-400"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            onClick={async () => {
-                                await fetch(`/api/diagram/${diagramToDelete._id}`, {
-                                method: 'DELETE',
-                                credentials: 'include',
-                                });
-                                setDiagramList((prev) => prev?.filter(d => d._id !== diagramToDelete._id) ?? []);
-                                setShowDeleteModal(false);
-                                setDiagramToDelete(null);
-                            }} 
-                            className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
-                        >
-                            Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            )}
 
-             {showDeleteUserModal && (
+            {showDeleteUserModal && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                 <div className="bg-white p-6 rounded-lg w-96">
                     <h2 className="text-xl font-bold mb-4">¿Eliminar cuenta?</h2>
@@ -228,6 +227,7 @@ export default function ERdocPlayground() {
                 </div>
             </div>
             )}
+
         </div>
     );
 }

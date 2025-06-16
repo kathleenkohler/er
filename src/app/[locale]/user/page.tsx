@@ -110,7 +110,9 @@ export default function ERdocPlayground() {
                     </button>
                     {menuOpen && (
                         <div className="absolute bottom-12 bg-white text-black rounded shadow-lg w-48 user-menu">
-                            <p className="p-2 hover:bg-gray-100 cursor-pointer">Cambiar contraseña</p>
+                            <button onClick={() => router.push(`/${locale}/user/change-password`)} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
+                                Cambiar contraseña
+                            </button>
                             <button onClick={() => {setShowDeleteUserModal(true)}}
                             className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
                                 Eliminar cuenta

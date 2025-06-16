@@ -1,4 +1,3 @@
-
 import { Box, Spinner, Button } from "@chakra-ui/react";
 import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import { editor, languages } from "monaco-types";
@@ -15,14 +14,17 @@ import getErrorMessage from "../../util/errorMessages";
 import { EditorHeader } from "./EditorHeader";
 import ExamplesTable from "./ExamplesTable";
 import ErrorTable from "./ErrorTable";
-import { fetchExample } from "../../util/common";
-import { useJSON } from "../../hooks/useJSON";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
 
-const DEFAULT_EXAMPLE = "company";
 
 type ErrorReportingEditorProps = {
   onErDocChange: (evt: ErDocChangeEvent) => void;
   onErrorChange: (hasError: boolean) => void;
+  modelName: string;
+  ydoc: Y.Doc;
+  provider: WebsocketProvider;
 };
 
 const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
@@ -37,7 +39,7 @@ const editorThemes: [themeName: string, theme: editor.IStandaloneThemeData][] =
           { token: "string", foreground: "#98c379" },
         ],
         colors: {
-          "editor.background": "#21252b",
+          "editor.background":  "#21252b",
         },
       },
     ],
@@ -108,13 +110,16 @@ const LOCAL_STORAGE_EDITOR_CONTENT_KEY = "monaco-editor-content";
 const CodeEditor = ({
   onErDocChange,
   onErrorChange,
+  modelName,
+  ydoc,
+  provider,
 }: ErrorReportingEditorProps) => {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const thisEditor = useMonaco();
   const semanticErrT = useTranslations("home.codeEditor.semanticErrorMessages");
   const [errorMessages, setErrorMessages] = useState<ErrorMessage[]>([]);
-  const { importJSON } = useJSON(onErDocChange);
   const [currentTheme, setCurrentTheme] = useState(DEFAULT_THEME);
+  const [binding, setBinding] = useState<MonacoBinding | null>(null);
 
   const toggleTheme = () => {
     const newTheme =
@@ -176,30 +181,23 @@ const CodeEditor = ({
   };
 
   const handleEditorMount: OnMount = (editor, monacoInstance) => {
-    editorRef.current = editor;
-    const prevContent = localStorage.getItem(LOCAL_STORAGE_EDITOR_CONTENT_KEY);
-    if (prevContent === null) {
-      // load an example from api
-      fetchExample(DEFAULT_EXAMPLE)
-        .then((example) => {
-          if (example) {
-            importJSON(example, monacoInstance);
-          }
-        })
-        .catch((err) => console.error(err));
-    } else {
-      editor.setValue(prevContent);
-      handleEditorContent(prevContent, monacoInstance);
-    }
-    // mount erdoc language
     monacoInstance.languages.register({ id: "erdoc" });
     monacoInstance.languages.setMonarchTokensProvider("erdoc", erdocTokenizer);
     monacoInstance.languages.setLanguageConfiguration("erdoc", erdocConfig);
-    // custom themes
     for (const [themeName, theme] of editorThemes) {
       monacoInstance.editor.defineTheme(themeName, theme);
     }
     monacoInstance.editor.setTheme(currentTheme);
+
+    const yText = ydoc.getText("monaco");
+
+    const monacoBinding = new MonacoBinding(
+      yText,
+      editor.getModel()!,
+      new Set([editor]),
+      provider.awareness
+    );
+    setBinding(monacoBinding);
   };
 
   return (
@@ -210,11 +208,11 @@ const CodeEditor = ({
       flexDir={"column"}
       overflow={"hidden"}
     >
-      <EditorHeader
+      <EditorHeader 
         editorRef={editorRef}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
-        modelName="" />
+        modelName={modelName} />
       <Box
         resize="none"
         pt={0}

@@ -1,7 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import Body from "../../components/Body";
 import Header from "../../components/Header/Header";
 import { Context } from "../../context";
 import { erDocWithoutLocation } from "../../util/common";
@@ -11,6 +11,10 @@ import { useJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
 import { useRouter } from 'next/navigation';
 import { useLocale } from "next-intl";
+import { debounce } from "lodash";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+const Body = dynamic(() => import( "../../components/BodyColab"), { ssr: false });
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -26,7 +30,25 @@ const Page = () => {
   const modelId = params.modelId as string;
   const [modelName, setModelName] = useState<string>("");
   const [showJoinModal, setShowJoinModal] = useState(false);
+  const saveRef = useRef<(id: string) => void>();
+  const ydocRef = useRef<Y.Doc>();
+  const providerRef = useRef<WebsocketProvider>();
+  const [ydocReady, setYdocReady] = useState(false);
 
+ useEffect(() => {
+    if (!monaco) return;
+    saveRef.current = debounce((id: string) => {
+      const editorModels = monaco.editor.getModels();
+      if (!editorModels?.length) return; 
+      const editorValue = editorModels[0].getValue();
+      fetch(`/api/diagram/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ json: editorValue, source: "code" }),
+      }).catch((err) => console.error("Error saving model:", err));
+    }, 5000);
+  }, [monaco]);
+  
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
       case "json": {
@@ -55,6 +77,9 @@ const Page = () => {
             JSON.stringify(currentErNoLoc) === JSON.stringify(newErNoLoc);
           return sameSemanticValue ? currentEr : er;
         });
+        if (modelId) {
+          saveRef.current?.(modelId);
+        }
         return;
       }
 
@@ -65,11 +90,26 @@ const Page = () => {
     }
   };
 
-  const { importJSON } = useJSON(onErDocChange);
+  const { importJSONColaborative } = useJSON(onErDocChange);
 
   useEffect(() => {
-    if (!modelId || !monaco) return;
-    const fetchModel = async () => {
+    const ydoc = new Y.Doc();
+    ydocRef.current = ydoc;
+
+    const provider = new WebsocketProvider(
+      process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234",
+      modelId,
+      ydoc
+    );
+    providerRef.current = provider;
+
+    provider.on("status", ({ status }) => {
+      console.log("WebSocket status:", status);
+    });
+
+    provider.on("sync", async (isSynced: boolean) => {
+      if (!isSynced) return;
+
       const res = await fetch(`/api/diagram/${modelId}`, {
         credentials: "include"
       });
@@ -77,16 +117,36 @@ const Page = () => {
         router.push(`/${locale}/login`);
         return;
       }
+      if (res.status === 500) {
+        router.push(`/${locale}`);
+        return;
+      }
       const data = await res.json();
       if (!data.isAuthorized) {
         setShowJoinModal(true);
-      } else {
-        setModelName(data.model.name); 
-        importJSON(data.model.json, monaco);
+        return;
       }
+
+      setModelName(data.model.name);
+
+      const yText = ydoc.getText("monaco");
+      const yNodesMap = ydoc.getMap("nodesMap");
+      const yEdgesMap = ydoc.getMap("edgesMap");
+
+      if (yText.length === 0) {
+        yText.insert(0, data.model.json.erDoc);
+      }
+      importJSONColaborative(data.model.json, ydoc);
+    });
+
+    setYdocReady(true);
+
+    return () => {
+      provider.destroy();
+      ydoc.destroy();
     };
-    fetchModel().catch((err) => console.error("Error fetching model:", err));;
-  }, [modelId, monaco]);
+  }, [modelId]);
+
 
   return (
     <Context.Provider
@@ -100,12 +160,18 @@ const Page = () => {
           <Header onErDocChange={onErDocChange} />
         </div>
         <div className="h-[90%] w-full min-[1340px]:h-[95%]">
+          { ydocReady && (
           <Body
             erDoc={erDoc}
             lastChange={lastChange}
             onErDocChange={onErDocChange}
             modelName={modelName}
+            ydoc={ydocRef.current!}
+            provider={providerRef.current!}
+            yNodesMap={ydocRef.current!.getMap("nodesMap")}
+            yEdgesMap={ydocRef.current!.getMap("edgesMap")}
           />
+          )}
         </div>
       </div>
       {showJoinModal && (
@@ -130,7 +196,7 @@ const Page = () => {
                   if (res.ok) {
                     const data = await res.json();
                     setModelName(data.model.name); 
-                    importJSON(data.model.json, monaco);
+                    importJSONColaborative(data.model.json, ydocRef.current!);
                     setShowJoinModal(false)
                   }
                 }}
