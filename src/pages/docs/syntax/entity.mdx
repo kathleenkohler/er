@@ -2,22 +2,26 @@
 
 An `entity` declaration consists of the keyword "entity" followed by its name, the entity it inherits from (if any), and a list of its attributes.
 The following example declares an entity with the name "Dog" which has the attributes "name", "breed", "age" and the key attribute "d_id".
-  ```erdoc
-  entity Dog {
-    d_id key
-    name
-    breed
-    age
-  } 
-  ```
-  ## Entity attributes
-  An entity attribute may be declared as a key attribute by adding the keyword `key` after the attribute name. Also, the ERdoc language allows attributes
-  to be composite following the `attribute: [part1, part2, partN]` syntax. The following example shows an entity with a composite attribute that is also 
-  part of the key of the entity. 
-  ```erdoc
-  entity Company_Branch {
-    company_name key
-    address: [street, city, zip] key
-    revenue
-  }
-  ```
+
+```erdoc
+entity Dog {
+  d_id key
+  name
+  breed
+  age
+}
+```
+
+## Entity attributes
+
+An entity attribute may be declared as a key attribute by adding the keyword `key` after the attribute name. Also, the ERdoc language allows attributes
+to be composite following the `attribute: [part1, part2, partN]` syntax. The following example shows an entity with a composite attribute that is also
+part of the key of the entity.
+
+```erdoc
+entity Company_Branch {
+  company_name key
+  address: [street, city, zip] key
+  revenue
+}
+```

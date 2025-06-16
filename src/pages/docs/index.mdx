@@ -1,10 +1,10 @@
-import { Callout } from 'nextra/components'
-import Image from 'next/image'
-import university from '../../../public/docs/university.png'
-import company from '../../../public/docs/complex_company.png'
+import { Callout } from "nextra/components";
+import Image from "next/image";
+import university from "../../../public/docs/university.png";
+import company from "../../../public/docs/complex_company.png";
 
 # About ERdoc
- 
+
 ERdoc is a markup language for creating Entity-Relationship models through text (ER documents).
 The Playground is a web-based tool to visualize ER documents as ER diagrams using common notations.
 
@@ -14,6 +14,7 @@ aggregations, subclass/superclass, n-ary relationships, cardinality and particip
 ## Examples
 
 An ER document is composed of a sequence of entity, relationship or aggregation declarations. The following example features ternary relationships, weak entities, inheritance and other concepts of the ER model:
+
 ```erdoc
 entity Employee {
     e_id key
@@ -68,10 +69,17 @@ relation Dependent_of(Employee, Dependent 1!)
 ```
 
 In the playground, this example will generate the following ER diagram (after adjusting some positions), here we are using _(min, max) notation_.
-<Image src={company} alt="complex company ER Diagram" style={{ backgroundColor: "#fff" }}/>
-Once you get familiar with the syntax, you'll find it much faster to create ER diagrams this way rather than using conventional, visual charting tools.
 
------
+<Image
+  src={company}
+  alt="complex company ER Diagram"
+  style={{ backgroundColor: "#fff" }}
+/>
+Once you get familiar with the syntax, you'll find it much faster to create ER diagrams
+this way rather than using conventional, visual charting tools.
+
+---
+
 The following ER document declares two entities and a relationship between them:
 
 ```erdoc
@@ -82,7 +90,7 @@ entity Student {
 }
 
 entity University {
-  name 
+  name
   address: [city, street, number]
   university_id key
 }
@@ -91,7 +99,13 @@ relation Studies_at(Student 1, University N!) {
   enrollment_date
 }
 ```
+
 And the ER diagram (using _Arrow notation_):
-<Image src={university} alt="university ER Diagram" style={{ backgroundColor: "#fff" }}/>
+
+<Image
+  src={university}
+  alt="university ER Diagram"
+  style={{ backgroundColor: "#fff" }}
+/>
 
 Read the next sections to learn more about ERdoc's syntax.
