@@ -304,6 +304,7 @@ const ErDiagram = ({
 
 	const debouncedSaveDiagram = useMemo(
 		() => debounce(async (nodesJSON: any, edgesJSON: any) => {
+      console.log("guardar diag")
 			await fetch(`/api/diagram/${modelId}`, {
 				method: "PUT",
 				headers: { "Content-Type": "application/json" },
@@ -312,7 +313,7 @@ const ErDiagram = ({
 					source: "diagram",
 				}),
 			});
-		}, 2000),
+		}, 5000),
 		[modelId]
 	);
 

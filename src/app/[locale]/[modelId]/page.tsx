@@ -38,6 +38,7 @@ const Page = () => {
  useEffect(() => {
     if (!monaco) return;
     saveRef.current = debounce((id: string) => {
+      console.log("guardando er")
       const editorModels = monaco.editor.getModels();
       if (!editorModels?.length) return; 
       const editorValue = editorModels[0].getValue();
@@ -46,7 +47,7 @@ const Page = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ json: editorValue, source: "code" }),
       }).catch((err) => console.error("Error saving model:", err));
-    }, 2000);
+    }, 5000);
   }, [monaco]);
   
   const onErDocChange = (evt: ErDocChangeEvent) => {
