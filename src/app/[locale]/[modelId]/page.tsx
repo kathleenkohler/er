@@ -38,7 +38,6 @@ const Page = () => {
  useEffect(() => {
     if (!monaco) return;
     saveRef.current = debounce((id: string) => {
-      console.log("guardando er")
       const editorModels = monaco.editor.getModels();
       if (!editorModels?.length) return; 
       const editorValue = editorModels[0].getValue();
