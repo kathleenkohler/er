@@ -100,7 +100,7 @@ export default function ChangePasswordForm() {
                     >+ Nuevo diagrama
                 </button>
                 <div className="space-y-2">
-                    <button className="hover:bg-gray-700 text-orange-400 p-2 rounded w-full text-left"
+                    <button className="hover:bg-gray-700 p-2 rounded w-full text-left"
                         onClick={() => router.push(`/${locale}/user`)}>
                         Mis diagramas
                     </button>
