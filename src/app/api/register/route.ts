@@ -45,15 +45,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Error al registrar usuario" }, { status: 500 });
   }
 }
-
-
-export async function GET() {
-  try {
-    await connectToDatabase();
-    const usuarios = await User.find();
-    return NextResponse.json({ usuarios });
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return NextResponse.json({ error: "Error al obtener usuarios" }, { status: 500 });
-  }
-}

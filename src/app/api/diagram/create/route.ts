@@ -57,14 +57,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Error al entrar a la cuenta" }, { status: 500 });
   }
 }
-
-export async function GET() {
-  try {
-    await connectToDatabase();
-    const modelos = await Model.find();
-    return NextResponse.json({ modelos });
-  } catch (error) {
-    console.error("Error al obtener usuarios:", error);
-    return NextResponse.json({ error: "Error al obtener usuarios" }, { status: 500 });
-  }
-}
