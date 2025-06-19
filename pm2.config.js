@@ -20,7 +20,7 @@ module.exports = {
       host: [{ host: process.env.DEPLOY_HOST, port: process.env.DEPLOY_PORT }],
       key: process.env.DEPLOY_KEY,
       ref: "origin/main",
-      repo: "https://github.com/matias-lg/er.git",
+      repo: "https://github.com/kathleenkohler/er.git",
       path: process.env.DEPLOY_PATH,
       "post-deploy":
         "npm i && npm run build:next && pm2 startOrRestart pm2.config.js",
