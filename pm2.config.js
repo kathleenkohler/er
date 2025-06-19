@@ -9,7 +9,7 @@ module.exports = {
       instances: 2,
       exec_mode: "cluster",
       env: {
-        PORT: 3000,
+        PORT: 4000,
       },
     },
   ],
