@@ -99,12 +99,13 @@ describe("DefaultAggregation", () => {
   });
 
   it("sets the width and height of the container", () => {
-    const width = 600;
-    const height = 400;
-    const { container } = render(
-      <DefaultAggregation data={{ label: "Aggregation", width, height }} />,
+    const width = 500;
+    const height = 500;
+    const { getByText } = render(
+      <DefaultAggregation data={{ label: "Aggregation"}} />,
     );
-    expect(container.firstChild).toHaveStyle(`width: ${width}px`);
-    expect(container.firstChild).toHaveStyle(`height: ${height}px`);
+    const nodeContainer = getByText("Aggregation").parentElement!;
+    expect(nodeContainer).toHaveStyle(`width: ${width}px`);
+    expect(nodeContainer).toHaveStyle(`height: ${height}px`);
   });
 });
