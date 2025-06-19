@@ -106,9 +106,10 @@ export const Header = ({ onErDocChange }: HeaderProps) => {
         <AboutButton />
         <GitHubButton />
         <button
-          className="flex items-center text-slate-400  hover:text-slate-300" 
-          onClick={() => router.push(`/${locale}/user`)}>
-          <FaUser className="inline mr-4 ml-1" />
+          className="flex items-center text-slate-400  hover:text-slate-300"
+          onClick={() => router.push(`/${locale}/user`)}
+        >
+          <FaUser className="ml-1 mr-4 inline" />
         </button>
       </div>
     </>

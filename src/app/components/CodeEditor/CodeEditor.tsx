@@ -1,4 +1,3 @@
-
 import { Box, Spinner, Button } from "@chakra-ui/react";
 import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import { editor, languages } from "monaco-types";
@@ -214,7 +213,8 @@ const CodeEditor = ({
         editorRef={editorRef}
         currentTheme={currentTheme}
         onToggleTheme={toggleTheme}
-        modelName="" />
+        modelName=""
+      />
       <Box
         resize="none"
         pt={0}

@@ -10,14 +10,20 @@ export async function POST(req: Request) {
     const { name, email, password } = await req.json();
 
     if (!name || !email || !password) {
-      return NextResponse.json({ error: "Todos los campos son obligatorios" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Todos los campos son obligatorios" },
+        { status: 400 },
+      );
     }
 
     await connectToDatabase();
 
     const usuarioExistente = await User.findOne({ email });
     if (usuarioExistente) {
-      return NextResponse.json({ error: "El usuario ya existe" }, { status: 409 });
+      return NextResponse.json(
+        { error: "El usuario ya existe" },
+        { status: 409 },
+      );
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -27,7 +33,9 @@ export async function POST(req: Request) {
 
     const token = generarToken(nuevoUsuario._id.toString());
 
-    const response = NextResponse.json({ mensaje: "Usuario registrado con éxito"});
+    const response = NextResponse.json({
+      mensaje: "Usuario registrado con éxito",
+    });
 
     response.headers.set(
       "Set-Cookie",
@@ -36,12 +44,15 @@ export async function POST(req: Request) {
         secure: process.env.NODE_ENV === "production",
         maxAge: 36000,
         path: "/",
-      })
+      }),
     );
 
     return response;
   } catch (error) {
     console.error("Error al registrar usuario:", error);
-    return NextResponse.json({ error: "Error al registrar usuario" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Error al registrar usuario" },
+      { status: 500 },
+    );
   }
 }

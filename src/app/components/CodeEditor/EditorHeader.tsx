@@ -31,28 +31,28 @@ export const EditorHeader = ({
       <Text
         color="white"
         fontSize="md"
-        className="max-w-[200px] truncate whitespace-nowrap overflow-hidden ml-4"
+        className="ml-4 max-w-[200px] overflow-hidden truncate whitespace-nowrap"
       >
         {modelName}
       </Text>
 
       <div className="flex">
-      <HStack spacing={3}>
-        <Text color="white" fontSize="sm">
-          {t("toggleTheme")}
-        </Text>
-        <Switch
-          isChecked={currentTheme === "onedark"}
-          onChange={onToggleTheme}
-          size="sm"
-          sx={{
-            "& .chakra-switch__track": {
-              backgroundColor:
-                currentTheme === "onedark" ? "#c678dd" : "#cbd5e0",
-            },
-          }}
-        />
-      </HStack>
+        <HStack spacing={3}>
+          <Text color="white" fontSize="sm">
+            {t("toggleTheme")}
+          </Text>
+          <Switch
+            isChecked={currentTheme === "onedark"}
+            onChange={onToggleTheme}
+            size="sm"
+            sx={{
+              "& .chakra-switch__track": {
+                backgroundColor:
+                  currentTheme === "onedark" ? "#c678dd" : "#cbd5e0",
+              },
+            }}
+          />
+        </HStack>
         <EditorButton
           icon={<BiSolidCopyAlt fill="#fff" />}
           label={t("copy")}

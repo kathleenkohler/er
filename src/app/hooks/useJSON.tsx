@@ -83,9 +83,9 @@ export const useJSON = (onErDocChange: (evt: ErDocChangeEvent) => void) => {
     });
   };
 
-  const importJSONColaborative = (json: ErJSON,  ydoc: Y.Doc) => {
+  const importJSONColaborative = (json: ErJSON, ydoc: Y.Doc) => {
     const editorText = json.erDoc;
-    setAutoLayoutEnabled(false); 
+    setAutoLayoutEnabled(false);
 
     const yText = ydoc.getText("monaco");
 

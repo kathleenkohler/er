@@ -15,8 +15,8 @@ import { useTranslations } from "next-intl";
 import { LuFilePlus } from "react-icons/lu";
 import { ErDocChangeEvent } from "../../types/CodeEditor";
 import { useState } from "react";
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 type NewDiagramButtonProps = {
   onErDocChange: (evt: ErDocChangeEvent) => void;
@@ -69,24 +69,23 @@ const NewDiagramButton = ({ onErDocChange }: NewDiagramButtonProps) => {
 
   const handleCreateDiagram = async () => {
     if (!newDiagramName.trim()) return;
-    const res = await fetch('/api/diagram/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: newDiagramName }),
-        credentials: 'include',
+    const res = await fetch("/api/diagram/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: newDiagramName }),
+      credentials: "include",
     });
 
     if (res.ok) {
-        const data = await res.json();
-        setShowCustomModal(false);
-        router.push(`/${locale}/${data.id}`); 
+      const data = await res.json();
+      setShowCustomModal(false);
+      router.push(`/${locale}/${data.id}`);
     } else {
-        console.error('Error creating diagram');
+      console.error("Error creating diagram");
     }
   };
-
 
   return (
     <>
@@ -112,33 +111,35 @@ const NewDiagramButton = ({ onErDocChange }: NewDiagramButtonProps) => {
         </ModalContent>
       </Modal>
 
-       {showCustomModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-              <div className="bg-white p-6 rounded-lg w-80">
-                  <h2 className="text-xl text-black font-bold mb-4">Nombre del diagrama</h2>
-                  <input
-                      type="text"
-                      placeholder="Nombre del diagrama"
-                      value={newDiagramName}
-                      onChange={(e) => setNewDiagramName(e.target.value)}
-                      className="w-full p-2 border text-black rounded mb-4"
-                  />
-                  <div className="flex justify-end gap-2">
-                      <button
-                          onClick={() => setShowCustomModal(false)}
-                          className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-                      >
-                          Cancelar
-                      </button>
-                      <button
-                          onClick={handleCreateDiagram}
-                          className="bg-orange-400 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
-                      >
-                          Aceptar
-                      </button>
-                  </div>
-              </div>
+      {showCustomModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-80 rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold text-black">
+              Nombre del diagrama
+            </h2>
+            <input
+              type="text"
+              placeholder="Nombre del diagrama"
+              value={newDiagramName}
+              onChange={(e) => setNewDiagramName(e.target.value)}
+              className="mb-4 w-full rounded border p-2 text-black"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowCustomModal(false)}
+                className="rounded bg-gray-300 px-4 py-2 font-bold text-black hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateDiagram}
+                className="rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-600"
+              >
+                Aceptar
+              </button>
+            </div>
           </div>
+        </div>
       )}
     </>
   );

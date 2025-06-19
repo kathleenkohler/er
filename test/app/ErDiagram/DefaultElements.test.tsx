@@ -102,7 +102,7 @@ describe("DefaultAggregation", () => {
     const width = 500;
     const height = 500;
     const { getByText } = render(
-      <DefaultAggregation data={{ label: "Aggregation"}} />,
+      <DefaultAggregation data={{ label: "Aggregation" }} />,
     );
     const nodeContainer = getByText("Aggregation").parentElement!;
     expect(nodeContainer).toHaveStyle(`width: ${width}px`);

@@ -13,7 +13,7 @@ type BodyProps = {
   lastChange: DiagramChange | null;
 };
 
-const Body = ({ erDoc, lastChange, onErDocChange}: BodyProps) => {
+const Body = ({ erDoc, lastChange, onErDocChange }: BodyProps) => {
   const [erDocHasError, setErDocHasError] = useState<boolean>(false);
   const [dragging, setDragging] = useState<boolean>(false);
   const { width } = useWindowDimensions();

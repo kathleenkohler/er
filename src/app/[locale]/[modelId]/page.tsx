@@ -9,12 +9,14 @@ import { DiagramChange, ErDocChangeEvent } from "../../types/CodeEditor";
 import { ER } from "../../../ERDoc/types/parser/ER";
 import { useJSON } from "../../hooks/useJSON";
 import { useMonaco } from "@monaco-editor/react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { debounce } from "lodash";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
-const Body = dynamic(() => import( "../../components/BodyColab"), { ssr: false });
+const Body = dynamic(() => import("../../components/BodyColab"), {
+  ssr: false,
+});
 
 const Page = () => {
   const [autoLayoutEnabled, setAutoLayoutEnabled] = useState<boolean | null>(
@@ -35,11 +37,11 @@ const Page = () => {
   const providerRef = useRef<WebsocketProvider>();
   const [ydocReady, setYdocReady] = useState(false);
 
- useEffect(() => {
+  useEffect(() => {
     if (!monaco) return;
     saveRef.current = debounce((id: string) => {
       const editorModels = monaco.editor.getModels();
-      if (!editorModels?.length) return; 
+      if (!editorModels?.length) return;
       const editorValue = editorModels[0].getValue();
       fetch(`/api/diagram/${id}`, {
         method: "PUT",
@@ -48,7 +50,7 @@ const Page = () => {
       }).catch((err) => console.error("Error saving model:", err));
     }, 5000);
   }, [monaco]);
-  
+
   const onErDocChange = (evt: ErDocChangeEvent) => {
     switch (evt.type) {
       case "json": {
@@ -99,7 +101,7 @@ const Page = () => {
     const provider = new WebsocketProvider(
       process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:1234",
       modelId,
-      ydoc
+      ydoc,
     );
     providerRef.current = provider;
 
@@ -111,7 +113,7 @@ const Page = () => {
       if (!isSynced) return;
 
       const res = await fetch(`/api/diagram/${modelId}`, {
-        credentials: "include"
+        credentials: "include",
       });
       if (res.status === 401) {
         router.push(`/${locale}/login`);
@@ -147,7 +149,6 @@ const Page = () => {
     };
   }, [modelId]);
 
-
   return (
     <Context.Provider
       value={{
@@ -160,34 +161,36 @@ const Page = () => {
           <Header onErDocChange={onErDocChange} />
         </div>
         <div className="h-[90%] w-full min-[1340px]:h-[95%]">
-          { ydocReady && (
-          <Body
-            erDoc={erDoc}
-            lastChange={lastChange}
-            onErDocChange={onErDocChange}
-            modelName={modelName}
-            ydoc={ydocRef.current!}
-            provider={providerRef.current!}
-            yNodesMap={ydocRef.current!.getMap("nodesMap")}
-            yEdgesMap={ydocRef.current!.getMap("edgesMap")}
-          />
+          {ydocReady && (
+            <Body
+              erDoc={erDoc}
+              lastChange={lastChange}
+              onErDocChange={onErDocChange}
+              modelName={modelName}
+              ydoc={ydocRef.current!}
+              provider={providerRef.current!}
+              yNodesMap={ydocRef.current!.getMap("nodesMap")}
+              yEdgesMap={ydocRef.current!.getMap("edgesMap")}
+            />
           )}
         </div>
       </div>
       {showJoinModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
-            <h2 className="text-xl font-bold mb-4">Unirse al diagrama</h2>
-            <p className="mb-4">No formas parte de este modelo. ¿Quieres unirte?</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">Unirse al diagrama</h2>
+            <p className="mb-4">
+              No formas parte de este modelo. ¿Quieres unirte?
+            </p>
             <div className="flex justify-end gap-2">
               <button
-                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+                className="rounded bg-gray-300 px-4 py-2 hover:bg-gray-400"
                 onClick={() => router.push(`/${locale}/user`)}
               >
                 Cancelar
               </button>
               <button
-                className="bg-orange-400 hover:bg-orange-600 text-white px-4 py-2 rounded"
+                className="rounded bg-orange-400 px-4 py-2 text-white hover:bg-orange-600"
                 onClick={async () => {
                   const res = await fetch(`/api/diagram/${modelId}/join`, {
                     method: "POST",
@@ -195,9 +198,9 @@ const Page = () => {
                   });
                   if (res.ok) {
                     const data = await res.json();
-                    setModelName(data.model.name); 
+                    setModelName(data.model.name);
                     importJSONColaborative(data.model.json, ydocRef.current!);
-                    setShowJoinModal(false)
+                    setShowJoinModal(false);
                   }
                 }}
               >

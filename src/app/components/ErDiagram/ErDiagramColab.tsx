@@ -39,7 +39,7 @@ type ErDiagramProps = {
   onNotationChange: (newNotationType: NotationTypes) => void;
   erEdgeNotation: ErNotation["edgeMarkers"];
   ydoc: Y.Doc;
-	yNodesMap: Y.Map<ErNode>;
+  yNodesMap: Y.Map<ErNode>;
   yEdgesMap: Y.Map<Edge>;
 };
 
@@ -48,15 +48,15 @@ const NotationSelectorErDiagramWrapper = ({
   erDocHasError,
   lastChange,
   ydoc,
-	yNodesMap,
-	yEdgesMap
+  yNodesMap,
+  yEdgesMap,
 }: {
   erDoc: ER;
   lastChange: DiagramChange | null;
   erDocHasError: boolean;
   ydoc: Y.Doc;
-	yNodesMap: Y.Map<ErNode>;
-	yEdgesMap: Y.Map<Edge>;
+  yNodesMap: Y.Map<ErNode>;
+  yEdgesMap: Y.Map<Edge>;
 }) => {
   const [edgesOrthogonal, setEdgesOrthogonal] = useState<boolean>(false);
   const [notationType, setNotationType] = useState<NotationTypes>("arrow");
@@ -76,7 +76,7 @@ const NotationSelectorErDiagramWrapper = ({
       onNotationChange={(newNotationType) => setNotationType(newNotationType)}
       setEdgesOrthogonal={setEdgesOrthogonal}
       ydoc={ydoc}
-			yNodesMap={yNodesMap}
+      yNodesMap={yNodesMap}
       yEdgesMap={yEdgesMap}
     />
   );
@@ -109,10 +109,10 @@ const ErDiagram = ({
   const { onNodeDrag, onNodeDragStart, onNodeDragStop } = useAlignmentGuide();
   const { saveToLocalStorage, loadFromLocalStorage, setRfInstance } =
     useDiagramToLocalStorage();
-	const { getNodes, getEdges } = useReactFlow();
+  const { getNodes, getEdges } = useReactFlow();
   useLayoutedElements(autoLayoutEnabled);
-	const params = useParams();
-	const modelId = params.modelId as string;
+  const params = useParams();
+  const modelId = params.modelId as string;
 
   useEffect(() => {
     const updateNodes = () => {
@@ -128,16 +128,16 @@ const ErDiagram = ({
     updateNodes();
     updateEdges();
 
-  return () => {
-    yNodesMap.unobserve(updateNodes);
-    yEdgesMap.unobserve(updateEdges);
-  };
+    return () => {
+      yNodesMap.unobserve(updateNodes);
+      yEdgesMap.unobserve(updateEdges);
+    };
   }, []);
 
   const syncYMapWithNodes = (nodes: ErNode[]) => {
     ydoc.transact(() => {
       const currentKeys = new Set(yNodesMap.keys());
-      const newKeys = new Set(nodes.map(n => n.id));
+      const newKeys = new Set(nodes.map((n) => n.id));
 
       nodes.forEach((node) => {
         const existing = yNodesMap.get(node.id);
@@ -157,7 +157,7 @@ const ErDiagram = ({
   const syncYMapWithEdges = (edges: Edge[]) => {
     ydoc.transact(() => {
       const currentKeys = new Set(yEdgesMap.keys());
-      const newKeys = new Set(edges.map(n => n.id));
+      const newKeys = new Set(edges.map((n) => n.id));
 
       edges.forEach((edge) => {
         const existing = yEdgesMap.get(edge.id);
@@ -208,38 +208,36 @@ const ErDiagram = ({
     setNodes((nodes) => {
       const alreadyExists: string[] = [];
       const updatedNodes = nodes
-          // if the node already exists, keep its position
-          .map((oldNode) => {
-            let newNode = fromErNodes.find(
-              (newNode) => newNode.data.erId === oldNode.data.erId,
-            );
-            if (!newNode && renaming) {
-              newNode = fromErNodes.find(
-                (newNode) => newNode.id === oldNode.id,
-              );
+        // if the node already exists, keep its position
+        .map((oldNode) => {
+          let newNode = fromErNodes.find(
+            (newNode) => newNode.data.erId === oldNode.data.erId,
+          );
+          if (!newNode && renaming) {
+            newNode = fromErNodes.find((newNode) => newNode.id === oldNode.id);
+          }
+          if (newNode) {
+            alreadyExists.push(newNode.id);
+            newNode.position = oldNode.position;
+            // for aggregations, don't modify its size
+            if (newNode.type === "aggregation") {
+              newNode.data.height = (oldNode as AggregationNode).data.height;
+              newNode.data.width = (oldNode as AggregationNode).data.width;
             }
-            if (newNode) {
-              alreadyExists.push(newNode.id);
-              newNode.position = oldNode.position;
-              // for aggregations, don't modify its size
-              if (newNode.type === "aggregation") {
-                newNode.data.height = (oldNode as AggregationNode).data.height;
-                newNode.data.width = (oldNode as AggregationNode).data.width;
-              }
-              return newNode;
-            }
-            return undefined;
-          })
-          .filter((n) => n !== undefined)
-          // hide the new nodes and add them
-          .concat(
-            fromErNodes
-              .filter((nn) => !alreadyExists.includes(nn.id))
-              .map((newNode) => ({
-                ...newNode,
-                style: { ...newNode.style, opacity: hideItems ? 0 : 1 },
-              })),
-          )
+            return newNode;
+          }
+          return undefined;
+        })
+        .filter((n) => n !== undefined)
+        // hide the new nodes and add them
+        .concat(
+          fromErNodes
+            .filter((nn) => !alreadyExists.includes(nn.id))
+            .map((newNode) => ({
+              ...newNode,
+              style: { ...newNode.style, opacity: hideItems ? 0 : 1 },
+            })),
+        );
       syncYMapWithNodes(updatedNodes);
       return updatedNodes;
     });
@@ -258,8 +256,8 @@ const ErDiagram = ({
             .map((e) => ({ ...e, hidden: hideItems ? true : false })),
         )
         .filter((e) => e !== undefined) as Edge[];
-        syncYMapWithEdges(updatedEdges);
-        return updatedEdges;
+      syncYMapWithEdges(updatedEdges);
+      return updatedEdges;
     });
     setTimeout(saveToLocalStorage, 100);
   }
@@ -294,7 +292,7 @@ const ErDiagram = ({
       if (existing) {
         yNodesMap.set(node.id, {
           ...existing,
-          position: node.position
+          position: node.position,
         });
       }
     });
@@ -302,35 +300,35 @@ const ErDiagram = ({
     onNodeDragStop(e, node, nodes);
   };
 
-	const debouncedSaveDiagram = useMemo(
-		() => debounce(async (nodesJSON: any, edgesJSON: any) => {
-			await fetch(`/api/diagram/${modelId}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					json: { nodesJSON, edgesJSON },
-					source: "diagram",
-				}),
-			});
-		}, 5000),
-		[modelId]
-	);
+  const debouncedSaveDiagram = useMemo(
+    () =>
+      debounce(async (nodesJSON: any, edgesJSON: any) => {
+        await fetch(`/api/diagram/${modelId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            json: { nodesJSON, edgesJSON },
+            source: "diagram",
+          }),
+        });
+      }, 5000),
+    [modelId],
+  );
 
-	useEffect(() => {
-		if (nodes.length === 0 && edges.length === 0) return;
-		const nodesJSON = getNodes().map((node) => ({
-        id: node.id,
-        position: node.position,
-        }));
+  useEffect(() => {
+    if (nodes.length === 0 && edges.length === 0) return;
+    const nodesJSON = getNodes().map((node) => ({
+      id: node.id,
+      position: node.position,
+    }));
 
     const edgesJSON = getEdges().map((edge) => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        }));
-		debouncedSaveDiagram(nodesJSON, edgesJSON);
-	}, [nodes, edges, debouncedSaveDiagram]);
-
+      id: edge.id,
+      source: edge.source,
+      target: edge.target,
+    }));
+    debouncedSaveDiagram(nodesJSON, edgesJSON);
+  }, [nodes, edges, debouncedSaveDiagram]);
 
   return (
     <ReactFlow

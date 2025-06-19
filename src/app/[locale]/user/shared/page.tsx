@@ -1,233 +1,275 @@
-"use client"
-import React, { useEffect, useState } from 'react';
-import { FaTrash, FaUser } from 'react-icons/fa';
-import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+"use client";
+import React, { useEffect, useState } from "react";
+import { FaTrash, FaUser } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 
 type Diagram = { _id: string; name: string };
 
 export default function ERdocPlayground() {
-    const [menuOpen, setMenuOpen] = useState(false);
-    const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
-    const [showModal, setShowModal] = useState(false);
-    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
-    const [newDiagramName, setNewDiagramName] = useState('');
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
-    const router = useRouter();
-    const locale = useLocale();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [newDiagramName, setNewDiagramName] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
+  const router = useRouter();
+  const locale = useLocale();
 
-     useEffect(() => {
-        fetch('/api/diagram/user/shared', { 
-            credentials: 'include' 
-        }).then(res => res.json())
-          .then(data => {
-            if (Array.isArray(data)) {
-                setDiagramList(data);
-            } else {
-                setDiagramList([]);
-            }
-            });
-        }, []);
-
-    const toggleMenu = () => {
-        setMenuOpen(!menuOpen);
-    };
-
-    const closeMenu = (event: MouseEvent) => {
-        if (!event.target || !(event.target instanceof HTMLElement)) return;
-        if (!event.target.closest('.user-menu') && !event.target.closest('.user-button')) {
-            setMenuOpen(false);
-        }
-    };
-
-    useEffect(() => {
-        document.addEventListener('mousedown', closeMenu);
-        return () => {
-            document.removeEventListener('mousedown', closeMenu);
-        };
-    }, []);
-
-    const handleLogout = async () => {
-        await fetch("/api/user/logout");
-        router.push(`/${locale}/login`);
-      };
-    
-    const handleCreateDiagram = async () => {
-        if (!newDiagramName.trim()) return;
-        const res = await fetch('/api/diagram/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ name: newDiagramName }),
-            credentials: 'include',
-        });
-
-        if (res.ok) {
-            const data = await res.json();
-            router.push(`/${locale}/${data.id}`); 
+  useEffect(() => {
+    fetch("/api/diagram/user/shared", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setDiagramList(data);
         } else {
-            console.error('Error creating diagram');
+          setDiagramList([]);
         }
+      });
+  }, []);
+
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const closeMenu = (event: MouseEvent) => {
+    if (!event.target || !(event.target instanceof HTMLElement)) return;
+    if (
+      !event.target.closest(".user-menu") &&
+      !event.target.closest(".user-button")
+    ) {
+      setMenuOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", closeMenu);
+    return () => {
+      document.removeEventListener("mousedown", closeMenu);
     };
+  }, []);
 
-    return (
-        <div className="flex h-screen bg-gray-100">
-            <aside className="w-1/4 bg-gray-800 text-white p-4 relative">
-                <h1 className="text-2xl font-bold mb-10">ERdoc Playground</h1>
-                <button className="w-full bg-orange-400 p-3 rounded text-white font-bold hover:bg-orange-600 mb-4"
-                     onClick={() => setShowModal(true)}
-                    >+ Nuevo diagrama
-                 </button>
-                <div className="space-y-2">
-                    <button className="hover:bg-gray-700 p-2 rounded w-full text-left"
-                        onClick={() => router.push(`/${locale}/user`)}>
-                        Mis diagramas
-                    </button>
-                    <button className="hover:bg-gray-700 p-2 rounded w-full text-left text-orange-400" 
-                        onClick={() => router.push(`/${locale}/user/shared`)}>
-                        Compartidos conmigo
-                    </button>
-                </div>
-                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex justify-center">
-                    <button className="bg-gray-600 hover:bg-gray-700 p-2 rounded" onClick={toggleMenu}>
-                        <FaUser className="inline mr-1 ml-1" />
-                    </button>
-                    {menuOpen && (
-                        <div className="absolute bottom-12 bg-white text-black rounded shadow-lg w-48 user-menu">
-                            <button onClick={() => router.push(`/${locale}/user/change-password`)} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
-                                Cambiar contraseña
-                            </button>
-                            <button onClick={() => {setShowDeleteUserModal(true)}}
-                                className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full">
-                                Eliminar cuenta
-                            </button>
-                            <button onClick={handleLogout} className="text-left p-2 hover:bg-gray-100 cursor-pointer w-full"> Cerrar sesión </button>
-                        </div>
-                    )}
-                </div>
-            </aside>
+  const handleLogout = async () => {
+    await fetch("/api/user/logout");
+    router.push(`/${locale}/login`);
+  };
 
-            <main className="w-3/4 p-8">
-                <h2 className="text-2xl font-semibold mb-4">Compartidos conmigo</h2>
-                <div className="bg-white p-4 rounded-lg shadow-md">
-                <h2 className="text-l font-semibold mb-2 pb-2 border-b">Nombre</h2>
-                    {diagramList === null ? (
-                        <p className="text-gray-500">Cargando...</p>
-                    ) : diagramList.length === 0 ? (
-                        <p className="text-gray-500">No tienes diagramas compartidos</p>
-                    ) : (
-                        <ul>
-                            {diagramList.map((diagram) => (
-                            <li key={diagram._id} className="flex justify-between items-center p-2 hover:bg-gray-200 rounded">
-                                <span
-                                    className="cursor-pointer flex-1"
-                                    onClick={() => router.push(`/${locale}/${diagram._id}`)}
-                                    >
-                                    {diagram.name}
-                                </span>
-                                <FaTrash
-                                    className="text-500 cursor-pointer ml-4"
-                                    onClick={() => {
-                                        setDiagramToDelete(diagram);
-                                        setShowDeleteModal(true);
-                                    }}/>
-                            </li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            </main>
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-6 rounded-lg w-80">
-                        <h2 className="text-xl font-bold mb-4">Nombre del diagrama</h2>
-                        <input
-                            type="text"
-                            placeholder="Nombre del diagrama"
-                            value={newDiagramName}
-                            onChange={(e) => setNewDiagramName(e.target.value)}
-                            className="w-full p-2 border rounded mb-4"
-                        />
-                        <div className="flex justify-end gap-2">
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded"
-                            >
-                                Cancelar
-                            </button>
-                            <button
-                                onClick={handleCreateDiagram}
-                                className="bg-orange-400 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded"
-                            >
-                                Aceptar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-             {showDeleteModal && diagramToDelete && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                <div className="bg-white p-6 rounded-lg w-96">
-                    <h2 className="text-xl font-bold mb-4">¿Eliminar diagrama compartido?</h2>
-                    <p className="mb-4">¿Estás seguro de que deseas salir del diagrama "{diagramToDelete.name}"?</p>
-                    <div className="flex justify-end gap-2">
-                        <button
-                            onClick={() => setShowDeleteModal(false)}
-                            className="px-4 py-2 bg-gray-300 rounded font-bold hover:bg-gray-400"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            onClick={async () => {
-                                await fetch(`/api/diagram/${diagramToDelete._id}`, {
-                                method: 'DELETE',
-                                credentials: 'include',
-                                });
-                                setDiagramList((prev) => prev?.filter(d => d._id !== diagramToDelete._id) ?? []);
-                                setShowDeleteModal(false);
-                                setDiagramToDelete(null);
-                            }} 
-                            className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
-                        >
-                            Eliminar
-                        </button>
-                    </div>
-                </div>
-            </div>
-            )}
+  const handleCreateDiagram = async () => {
+    if (!newDiagramName.trim()) return;
+    const res = await fetch("/api/diagram/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: newDiagramName }),
+      credentials: "include",
+    });
 
-             {showDeleteUserModal && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                <div className="bg-white p-6 rounded-lg w-96">
-                    <h2 className="text-xl font-bold mb-4">¿Eliminar cuenta?</h2>
-                    <p className="mb-4">¿Seguro que quieres eliminar tu cuenta? Esta acción es irreversible. 
-                        Perderás todos tus datos asociados a la cuenta y no podrás recuperarla.</p>
-                    <div className="flex justify-end gap-2">
-                        <button
-                            onClick={() => setShowDeleteUserModal(false)}
-                            className="px-4 py-2 bg-gray-300 rounded font-bold hover:bg-gray-400"
-                        >
-                            Cancelar
-                        </button>
-                        <button 
-                            onClick={async () => {
-                                await fetch(`/api/user`, {
-                                method: 'DELETE',
-                                credentials: 'include',
-                                });
-                                setShowDeleteUserModal(false);
-                                router.push(`/${locale}/login`);
-                            }} 
-                            className="px-4 py-2 bg-red-500 text-white rounded font-bold hover:bg-red-600"
-                        >
-                            Eliminar cuenta
-                        </button>
-                    </div>
-                </div>
-            </div>
-            )}
+    if (res.ok) {
+      const data = await res.json();
+      router.push(`/${locale}/${data.id}`);
+    } else {
+      console.error("Error creating diagram");
+    }
+  };
+
+  return (
+    <div className="flex h-screen bg-gray-100">
+      <aside className="relative w-1/4 bg-gray-800 p-4 text-white">
+        <h1 className="mb-10 text-2xl font-bold">ERdoc Playground</h1>
+        <button
+          className="mb-4 w-full rounded bg-orange-400 p-3 font-bold text-white hover:bg-orange-600"
+          onClick={() => setShowModal(true)}
+        >
+          + Nuevo diagrama
+        </button>
+        <div className="space-y-2">
+          <button
+            className="w-full rounded p-2 text-left hover:bg-gray-700"
+            onClick={() => router.push(`/${locale}/user`)}
+          >
+            Mis diagramas
+          </button>
+          <button
+            className="w-full rounded p-2 text-left text-orange-400 hover:bg-gray-700"
+            onClick={() => router.push(`/${locale}/user/shared`)}
+          >
+            Compartidos conmigo
+          </button>
         </div>
-    );
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 transform justify-center">
+          <button
+            className="rounded bg-gray-600 p-2 hover:bg-gray-700"
+            onClick={toggleMenu}
+          >
+            <FaUser className="ml-1 mr-1 inline" />
+          </button>
+          {menuOpen && (
+            <div className="user-menu absolute bottom-12 w-48 rounded bg-white text-black shadow-lg">
+              <button
+                onClick={() => router.push(`/${locale}/user/change-password`)}
+                className="w-full cursor-pointer p-2 text-left hover:bg-gray-100"
+              >
+                Cambiar contraseña
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteUserModal(true);
+                }}
+                className="w-full cursor-pointer p-2 text-left hover:bg-gray-100"
+              >
+                Eliminar cuenta
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-full cursor-pointer p-2 text-left hover:bg-gray-100"
+              >
+                {" "}
+                Cerrar sesión{" "}
+              </button>
+            </div>
+          )}
+        </div>
+      </aside>
+
+      <main className="w-3/4 p-8">
+        <h2 className="mb-4 text-2xl font-semibold">Compartidos conmigo</h2>
+        <div className="rounded-lg bg-white p-4 shadow-md">
+          <h2 className="text-l mb-2 border-b pb-2 font-semibold">Nombre</h2>
+          {diagramList === null ? (
+            <p className="text-gray-500">Cargando...</p>
+          ) : diagramList.length === 0 ? (
+            <p className="text-gray-500">No tienes diagramas compartidos</p>
+          ) : (
+            <ul>
+              {diagramList.map((diagram) => (
+                <li
+                  key={diagram._id}
+                  className="flex items-center justify-between rounded p-2 hover:bg-gray-200"
+                >
+                  <span
+                    className="flex-1 cursor-pointer"
+                    onClick={() => router.push(`/${locale}/${diagram._id}`)}
+                  >
+                    {diagram.name}
+                  </span>
+                  <FaTrash
+                    className="text-500 ml-4 cursor-pointer"
+                    onClick={() => {
+                      setDiagramToDelete(diagram);
+                      setShowDeleteModal(true);
+                    }}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </main>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-80 rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">Nombre del diagrama</h2>
+            <input
+              type="text"
+              placeholder="Nombre del diagrama"
+              value={newDiagramName}
+              onChange={(e) => setNewDiagramName(e.target.value)}
+              className="mb-4 w-full rounded border p-2"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="rounded bg-gray-300 px-4 py-2 font-bold text-black hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreateDiagram}
+                className="rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-600"
+              >
+                Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && diagramToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">
+              ¿Eliminar diagrama compartido?
+            </h2>
+            <p className="mb-4">
+              {
+                '¿Estás seguro de que deseas salir del diagrama "{diagramToDelete.name}"?'
+              }
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="rounded bg-gray-300 px-4 py-2 font-bold hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  await fetch(`/api/diagram/${diagramToDelete._id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                  });
+                  setDiagramList(
+                    (prev) =>
+                      prev?.filter((d) => d._id !== diagramToDelete._id) ?? [],
+                  );
+                  setShowDeleteModal(false);
+                  setDiagramToDelete(null);
+                }}
+                className="rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showDeleteUserModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-96 rounded-lg bg-white p-6">
+            <h2 className="mb-4 text-xl font-bold">¿Eliminar cuenta?</h2>
+            <p className="mb-4">
+              ¿Seguro que quieres eliminar tu cuenta? Esta acción es
+              irreversible. Perderás todos tus datos asociados a la cuenta y no
+              podrás recuperarla.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteUserModal(false)}
+                className="rounded bg-gray-300 px-4 py-2 font-bold hover:bg-gray-400"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={async () => {
+                  await fetch(`/api/user`, {
+                    method: "DELETE",
+                    credentials: "include",
+                  });
+                  setShowDeleteUserModal(false);
+                  router.push(`/${locale}/login`);
+                }}
+                className="rounded bg-red-500 px-4 py-2 font-bold text-white hover:bg-red-600"
+              >
+                Eliminar cuenta
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

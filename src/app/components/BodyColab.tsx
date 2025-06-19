@@ -9,7 +9,9 @@ import { ErDiagram } from "./ErDiagram/ErDiagramColab";
 import type * as Y from "yjs";
 import type { WebsocketProvider } from "y-websocket";
 
-const CodeEditor = dynamic(() => import("./CodeEditor/CodeEditorColab"), {ssr: false});
+const CodeEditor = dynamic(() => import("./CodeEditor/CodeEditorColab"), {
+  ssr: false,
+});
 
 type BodyProps = {
   erDoc: ER | null;
@@ -18,11 +20,20 @@ type BodyProps = {
   modelName: string;
   ydoc: Y.Doc;
   provider: WebsocketProvider;
-  yNodesMap: any
-  yEdgesMap: any
+  yNodesMap: any;
+  yEdgesMap: any;
 };
 
-const Body = ({ erDoc, lastChange, onErDocChange, modelName, ydoc, provider, yNodesMap, yEdgesMap }: BodyProps) => {
+const Body = ({
+  erDoc,
+  lastChange,
+  onErDocChange,
+  modelName,
+  ydoc,
+  provider,
+  yNodesMap,
+  yEdgesMap,
+}: BodyProps) => {
   const [erDocHasError, setErDocHasError] = useState<boolean>(false);
   const [dragging, setDragging] = useState<boolean>(false);
   const { width } = useWindowDimensions();
