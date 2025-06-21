@@ -77,7 +77,7 @@ export default function Login() {
               <FaLock className="absolute right-3 top-3 text-gray-400" />
             </div>
           </div>
-          <a href="#" className="mb-4 text-sm text-gray-400">
+          <a href="/forgot-password" className="mb-4 text-sm text-gray-400">
             ¿Olvidaste tu contraseña?
           </a>
           <button
