@@ -228,7 +228,7 @@ const ErDiagram = ({
           }
           return undefined;
         })
-        .filter((n) => n !== undefined)
+        .filter((n): n is ErNode => n !== undefined)
         // hide the new nodes and add them
         .concat(
           fromErNodes
