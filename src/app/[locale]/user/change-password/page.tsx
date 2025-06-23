@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { FaUser } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
+import Link from "next/link";
 
 export default function ChangePasswordForm() {
   const locale = useLocale();
@@ -95,7 +96,9 @@ export default function ChangePasswordForm() {
   return (
     <div className="flex h-screen bg-gray-100">
       <aside className="relative w-1/4 bg-gray-800 p-4 text-white">
-        <h1 className="mb-10 text-2xl font-bold">ERdoc Playground</h1>
+        <Link href={`/${locale}`} className="self-start">
+          <h1 className="mb-10 text-2xl font-bold">ERdoc Playground</h1>
+        </Link>
         <button
           className="mb-4 w-full rounded bg-orange-400 p-3 font-bold text-white hover:bg-orange-600"
           onClick={() => setShowModal(true)}

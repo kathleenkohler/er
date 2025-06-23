@@ -39,9 +39,11 @@ export default function Login() {
   return (
     <div className="flex h-screen">
       <div className="flex flex-1 flex-col items-center justify-center bg-gray-100">
-        <h1 className="mb-6 ml-20 self-start text-4xl font-bold text-blue-900">
-          ERdoc Playground
-        </h1>
+        <Link href={`/${locale}`} className="self-start">
+          <h1 className="mb-6 ml-20 cursor-pointer self-start text-4xl font-bold text-blue-900">
+            ERdoc Playground
+          </h1>
+        </Link>
         <div className="relative flex h-full w-full items-center justify-center overflow-hidden">
           <Image
             src="/er.png"
