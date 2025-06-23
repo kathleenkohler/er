@@ -9,11 +9,13 @@ import { useLocale } from "next-intl";
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setClave] = useState("");
+  const [error, setError] = useState("");
   const router = useRouter();
   const locale = useLocale();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     try {
       const res = await fetch("/api/login", {
@@ -23,7 +25,11 @@ export default function Login() {
         },
         body: JSON.stringify({ email, password }),
       });
-      if (!res.ok) throw new Error("Error al iniciar sesión");
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error);
+        return;
+      }
       router.push(`/${locale}/user`);
     } catch (error) {
       console.error(error);
@@ -50,6 +56,11 @@ export default function Login() {
       <div className="flex w-1/3 flex-col justify-center bg-gray-900 p-10 text-white">
         <h2 className="mb-6 text-3xl font-bold">Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="mb-4 rounded bg-red-600 p-3 text-sm text-white">
+              {error}
+            </div>
+          )}
           <div className="mb-4">
             <label className="mb-2 block text-sm">Correo electrónico</label>
             <div className="relative">

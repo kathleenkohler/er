@@ -20,7 +20,10 @@ export async function POST(req: Request) {
 
     const usuario = await User.findOne({ email });
     if (!usuario) {
-      return NextResponse.json({ error: "Usuario no existe" }, { status: 404 });
+      return NextResponse.json(
+        { error: "No existe un usuario asociado a ese correo electrónico" },
+        { status: 404 },
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(password, usuario.password);
