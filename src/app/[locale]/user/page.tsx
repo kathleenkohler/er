@@ -9,7 +9,6 @@ type Diagram = { _id: string; name: string };
 
 export default function ERdocPlayground() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
   const [diagramList, setDiagramList] = useState<Diagram[] | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
@@ -19,16 +18,11 @@ export default function ERdocPlayground() {
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [diagramToShare, setDiagramToShare] = useState<Diagram | null>(null);
   const [copiedMessageVisible, setCopiedMessageVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const locale = useLocale();
 
   useEffect(() => {
-    fetch("/api/user", {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then(setUser);
-
     fetch("/api/diagram/user", {
       credentials: "include",
     })
@@ -63,8 +57,6 @@ export default function ERdocPlayground() {
     };
   }, []);
 
-  if (!user) return <div>Loading...</div>;
-
   const handleLogout = async () => {
     await fetch("/api/user/logout");
     router.push(`/${locale}/login`);
@@ -72,6 +64,7 @@ export default function ERdocPlayground() {
 
   const handleCreateDiagram = async () => {
     if (!newDiagramName.trim()) return;
+    setLoading(true);
     const res = await fetch("/api/diagram/create", {
       method: "POST",
       headers: {
@@ -83,6 +76,7 @@ export default function ERdocPlayground() {
 
     if (res.ok) {
       const data = await res.json();
+      setLoading(false);
       router.push(`/${locale}/${data.id}`);
     } else {
       console.error("Error creating diagram");
@@ -212,9 +206,16 @@ export default function ERdocPlayground() {
               </button>
               <button
                 onClick={handleCreateDiagram}
-                className="rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-600"
+                disabled={loading}
+                className={`rounded px-4 py-2 font-bold text-white
+                  ${
+                    loading
+                      ? "cursor-not-allowed bg-orange-300"
+                      : "bg-orange-400 hover:bg-orange-600"
+                  }
+                `}
               >
-                Aceptar
+                {loading ? "Cargando..." : "Aceptar"}
               </button>
             </div>
           </div>

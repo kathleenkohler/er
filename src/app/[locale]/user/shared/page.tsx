@@ -15,6 +15,7 @@ export default function ERdocPlayground() {
   const [newDiagramName, setNewDiagramName] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [diagramToDelete, setDiagramToDelete] = useState<Diagram | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const locale = useLocale();
 
@@ -60,6 +61,7 @@ export default function ERdocPlayground() {
 
   const handleCreateDiagram = async () => {
     if (!newDiagramName.trim()) return;
+    setLoading(true);
     const res = await fetch("/api/diagram/create", {
       method: "POST",
       headers: {
@@ -71,6 +73,7 @@ export default function ERdocPlayground() {
 
     if (res.ok) {
       const data = await res.json();
+      setLoading(false);
       router.push(`/${locale}/${data.id}`);
     } else {
       console.error("Error creating diagram");
@@ -192,9 +195,16 @@ export default function ERdocPlayground() {
               </button>
               <button
                 onClick={handleCreateDiagram}
-                className="rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-600"
+                disabled={loading}
+                className={`rounded px-4 py-2 font-bold text-white
+                  ${
+                    loading
+                      ? "cursor-not-allowed bg-orange-300"
+                      : "bg-orange-400 hover:bg-orange-600"
+                  }
+                `}
               >
-                Aceptar
+                {loading ? "Cargando..." : "Aceptar"}
               </button>
             </div>
           </div>

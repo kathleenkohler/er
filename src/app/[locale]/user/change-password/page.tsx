@@ -18,6 +18,7 @@ export default function ChangePasswordForm() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +72,7 @@ export default function ChangePasswordForm() {
 
   const handleCreateDiagram = async () => {
     if (!newDiagramName.trim()) return;
+    setLoading(true);
     const res = await fetch("/api/diagram/create", {
       method: "POST",
       headers: {
@@ -82,6 +84,7 @@ export default function ChangePasswordForm() {
 
     if (res.ok) {
       const data = await res.json();
+      setLoading(false);
       router.push(`/${locale}/${data.id}`);
     } else {
       console.error("Error creating diagram");
@@ -218,9 +221,16 @@ export default function ChangePasswordForm() {
               </button>
               <button
                 onClick={handleCreateDiagram}
-                className="rounded bg-orange-400 px-4 py-2 font-bold text-white hover:bg-orange-600"
+                disabled={loading}
+                className={`rounded px-4 py-2 font-bold text-white
+                  ${
+                    loading
+                      ? "cursor-not-allowed bg-orange-300"
+                      : "bg-orange-400 hover:bg-orange-600"
+                  }
+                `}
               >
-                Aceptar
+                {loading ? "Cargando..." : "Aceptar"}
               </button>
             </div>
           </div>

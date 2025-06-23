@@ -12,12 +12,14 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setClave] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const locale = useLocale();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
       const res = await fetch("/api/register", {
@@ -31,9 +33,11 @@ export default function Register() {
       if (!res.ok) {
         const data = await res.json();
         setError(data.error);
+        setLoading(false);
         return;
       }
       const data = await res.json();
+      setLoading(false);
       router.push(`/${locale}/user`);
     } catch (error) {
       console.error(error);
@@ -114,9 +118,16 @@ export default function Register() {
 
           <button
             type="submit"
-            className="w-full rounded bg-orange-400 p-3 font-bold text-white hover:bg-orange-600"
+            disabled={loading}
+            className={`w-full rounded p-3 font-bold text-white
+              ${
+                loading
+                  ? "cursor-not-allowed bg-orange-300"
+                  : "bg-orange-400 hover:bg-orange-600"
+              }
+            `}
           >
-            Registrarme
+            {loading ? "Cargando..." : "Registrarme"}
           </button>
         </form>
         <p className="mt-4 text-center text-sm">
