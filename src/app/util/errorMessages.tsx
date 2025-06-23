@@ -107,6 +107,13 @@ const getErrorMessage = (t: translation, err: SemanticError): string => {
         relationshipName: err.relationshipName,
       });
 
+    case "AGGREGATION_INCLUDES_WEAK_ENTITY":
+      return t("AGGREGATION_INCLUDES_WEAK_ENTITY", {
+        aggregationName: err.aggregationName,
+        relationshipName: err.relationshipName,
+        weakEntityName: err.weakEntityName,
+      });
+
     default: {
       const exhaustiveCheck: never = err;
       throw new Error(
