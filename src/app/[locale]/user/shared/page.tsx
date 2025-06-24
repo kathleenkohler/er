@@ -73,7 +73,6 @@ export default function ERdocPlayground() {
 
     if (res.ok) {
       const data = await res.json();
-      setLoading(false);
       router.push(`/${locale}/${data.id}`);
     } else {
       console.error("Error creating diagram");
@@ -217,9 +216,7 @@ export default function ERdocPlayground() {
               ¿Eliminar diagrama compartido?
             </h2>
             <p className="mb-4">
-              {
-                '¿Estás seguro de que deseas salir del diagrama "{diagramToDelete.name}"?'
-              }
+              {`¿Estás seguro de que deseas salir del diagrama "${diagramToDelete.name}"?`}
             </p>
             <div className="flex justify-end gap-2">
               <button

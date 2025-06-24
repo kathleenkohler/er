@@ -76,7 +76,6 @@ export default function ERdocPlayground() {
 
     if (res.ok) {
       const data = await res.json();
-      setLoading(false);
       router.push(`/${locale}/${data.id}`);
     } else {
       console.error("Error creating diagram");
@@ -269,7 +268,7 @@ export default function ERdocPlayground() {
           <div className="w-96 rounded-lg bg-white p-6">
             <h2 className="mb-4 text-xl font-bold">¿Eliminar diagrama?</h2>
             <p className="mb-4">
-              {'¿Estás seguro de que deseas eliminar "{diagramToDelete.name}"?'}
+              {`¿Estás seguro de que deseas eliminar "${diagramToDelete.name}"?`}
             </p>
             <div className="flex justify-end gap-2">
               <button
