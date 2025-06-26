@@ -125,6 +125,14 @@ export type AggregationUsesEntityName = {
   location: TokenLocation;
 };
 
+export type AggregationIncludesWeakEntityError = {
+  type: "AGGREGATION_INCLUDES_WEAK_ENTITY";
+  aggregationName: string;
+  relationshipName: string;
+  weakEntityName: string;
+  location: TokenLocation;
+};
+
 export type SemanticError =
   | EntityDuplicateError
   | EntityDuplicateAttributeError
@@ -144,4 +152,5 @@ export type SemanticError =
   | AggregationDuplicateError
   | AggregationRelationshipNotExistsError
   | AggregationUsesSameRelationshipError
-  | AggregationUsesEntityName;
+  | AggregationUsesEntityName
+  | AggregationIncludesWeakEntityError;

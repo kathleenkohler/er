@@ -16,6 +16,7 @@ import { checkAggregationDuplicate } from "./aggregation/checkAggregationDuplica
 import { checkAggregationRelationshipNotExists } from "./aggregation/checkAggregationRelationshipNotExists";
 import { checkAggregationUsesSameRelationship } from "./aggregation/checkAggregationUsesSameRelationship";
 import { checkAggregationUsesEntityName } from "./aggregation/checkAggregationUsesEntityName";
+import { checkAggregationIncludesWeakEntity } from "./aggregation/checkAggregationIncludesWeakEntity";
 import { checkRelationshipParticipatingEntityNotExists } from "./relationship/checkRelationshipParticipatingEntityNotExists";
 import { checkEntityExtendsChildEntity } from "./entity/checkEntityExtendsChild";
 import { checkWeakEntityNoPkey } from "./entity/checkWeakEntityNoPkey";
@@ -48,6 +49,7 @@ const validators: checkErrorFunction[] = [
   checkAggregationRelationshipNotExists,
   checkAggregationUsesSameRelationship,
   checkAggregationUsesEntityName,
+  checkAggregationIncludesWeakEntity,
 ];
 
 export const getSemanticErrors = (er: ER): SemanticError[] => {
