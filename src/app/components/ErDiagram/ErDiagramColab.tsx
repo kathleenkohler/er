@@ -107,7 +107,7 @@ const ErDiagram = ({
   const { autoLayoutEnabled } = useContext(Context);
 
   const { onNodeDrag, onNodeDragStart, onNodeDragStop } = useAlignmentGuide();
-  const { saveToLocalStorage, loadFromLocalStorage, setRfInstance } =
+  const { saveToLocalStorage, setRfInstance } =
     useDiagramToLocalStorage();
   const { getNodes, getEdges } = useReactFlow();
   useLayoutedElements(autoLayoutEnabled);
@@ -190,9 +190,8 @@ const ErDiagram = ({
         syncYMapWithNodes(updatedNodes as ErNode[]);
         return updatedNodes;
       });
-      setTimeout(saveToLocalStorage, 100);
     }
-  }, [lastChange, saveToLocalStorage, setNodes, fitView]);
+  }, [lastChange, setNodes, fitView]);
 
   if (!erDocHasError && erDoc !== prevErDoc) {
     setPrevErDoc(erDoc);
@@ -259,7 +258,6 @@ const ErDiagram = ({
       syncYMapWithEdges(updatedEdges);
       return updatedEdges;
     });
-    setTimeout(saveToLocalStorage, 100);
   }
 
   useEffect(() => {
@@ -275,14 +273,11 @@ const ErDiagram = ({
       const viewport = document.querySelector(".react-flow__viewport")!;
       const defs = document.querySelector("#defs")!;
       viewport.append(defs);
-      // on mount, load from local storage
-      loadFromLocalStorage();
     },
-    [setRfInstance, loadFromLocalStorage],
+    [setRfInstance],
   );
 
   const onNodeDragStartHandler: NodeDragHandler = (e, node, nodes) => {
-    saveToLocalStorage();
     onNodeDragStart(e, node, nodes);
   };
 
@@ -296,7 +291,6 @@ const ErDiagram = ({
         });
       }
     });
-    saveToLocalStorage();
     onNodeDragStop(e, node, nodes);
   };
 
