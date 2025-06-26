@@ -6,10 +6,12 @@ import { useState } from "react";
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
   const locale = useLocale();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     const res = await fetch("/api/user/forgot-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,8 +21,10 @@ export default function ForgotPasswordPage() {
     const data = await res.json();
     if (res.ok) {
       setMessage("Revisa tu correo para restablecer la contraseña.");
+      setLoading(false);
     } else {
       setMessage(data.message || "Error al enviar el correo");
+      setLoading(false);
     }
   };
 
@@ -38,7 +42,14 @@ export default function ForgotPasswordPage() {
 
       <button
         type="submit"
-        className="w-full rounded bg-orange-400 p-2 font-bold text-white hover:bg-orange-600"
+        disabled={loading}
+        className={`w-full rounded p-3 font-bold text-white
+          ${
+            loading
+              ? "cursor-not-allowed bg-orange-300"
+              : "bg-orange-400 hover:bg-orange-600"
+          }
+        `}
       >
         Enviar enlace de recuperación
       </button>
