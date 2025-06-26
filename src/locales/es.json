@@ -120,7 +120,9 @@
 
         "AGGREGATION_RELATIONSHIP_NOT_EXISTS": "La agregación \"{aggregationName}\" encapsula una relación no existente: \"{relationshipName}\"",
 
-        "AGGREGATION_RELATIONSHIP_ALREADY_USED": "La agregación \"{aggregationName}\" encapsula la relación \"{relationshipName}\", que ya se está utilizando por otra agregación"
+        "AGGREGATION_RELATIONSHIP_ALREADY_USED": "La agregación \"{aggregationName}\" encapsula la relación \"{relationshipName}\", que ya se está utilizando por otra agregación",
+
+        "AGGREGATION_INCLUDES_WEAK_ENTITY": "La agregación \"{aggregationName}\" encapsula la relación \"{relationshipName}\" que incluye la entidad débil \"{weakEntityName}\""
       },
       "editorHeader": {
         "copy": "Copiar código",
