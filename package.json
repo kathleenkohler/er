@@ -10,6 +10,7 @@
     "build:parser": "peggy -o ./src/ERDoc/parser/peggy/generated.js ./src/ERDoc/parser/peggy/er-parser.pegjs",
     "test": "npm run build:parser && jest",
     "dev": "next dev -p 4000",
+    "dev:start": "next start -p 4000",
     "build:next": "next build",
     "start": "next start",
     "lint:next": "next lint"
