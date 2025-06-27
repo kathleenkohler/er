@@ -107,8 +107,7 @@ const ErDiagram = ({
   const { autoLayoutEnabled } = useContext(Context);
 
   const { onNodeDrag, onNodeDragStart, onNodeDragStop } = useAlignmentGuide();
-  const { saveToLocalStorage, setRfInstance } =
-    useDiagramToLocalStorage();
+  const { saveToLocalStorage, setRfInstance } = useDiagramToLocalStorage();
   const { getNodes, getEdges } = useReactFlow();
   useLayoutedElements(autoLayoutEnabled);
   const params = useParams();

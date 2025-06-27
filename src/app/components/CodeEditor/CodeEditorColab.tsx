@@ -190,13 +190,21 @@ const CodeEditor = ({
 
     const yText = ydoc.getText("monaco");
 
-    const monacoBinding = new MonacoBinding(
-      yText,
-      editor.getModel()!,
-      new Set([editor]),
-      provider.awareness,
-    );
-    setBinding(monacoBinding);
+    const setupBinding = () => {
+      const monacoBinding = new MonacoBinding(
+        yText,
+        editor.getModel()!,
+        new Set([editor]),
+        provider.awareness,
+      );
+      setBinding(monacoBinding);
+    };
+
+    if (provider.synced) {
+      setupBinding();
+    } else {
+      provider.once("sync", setupBinding);
+    }
   };
 
   return (
