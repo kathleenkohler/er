@@ -1,9 +1,9 @@
 import { Box, IconButton, Switch, Text, HStack } from "@chakra-ui/react";
 import { editor } from "monaco-types";
-import { MutableRefObject, ReactElement, useState } from "react";
+import { MutableRefObject, ReactElement, useEffect, useState } from "react";
 import { colors } from "../../util/colors";
 import { BiSolidCopyAlt } from "react-icons/bi";
-import { FaRedo, FaUndo } from "react-icons/fa";
+import { FaRedo, FaUndo, FaShareAlt } from "react-icons/fa";
 import { AiOutlineCheck } from "react-icons/ai";
 import { useTranslations } from "next-intl";
 
@@ -19,6 +19,16 @@ export const EditorHeader = ({
   modelName: string;
 }) => {
   const t = useTranslations("home.codeEditor.editorHeader");
+  const [shareUrl, setShareUrl] = useState("");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [copiedMessageVisible, setCopiedMessageVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && modelName) {
+      console.log(window.location.href);
+      setShareUrl(window.location.href);
+    }
+  }, [modelName]);
 
   return (
     <Box
@@ -74,7 +84,55 @@ export const EditorHeader = ({
           label={t("redo")}
           onClick={() => editorRef.current?.trigger("undoButton", "redo", null)}
         />
+
+        {modelName !== "" && (
+          <EditorButton
+            icon={<FaShareAlt fill="#fff" />}
+            label={t("share")}
+            onClick={() => setShareModalOpen(true)}
+          />
+        )}
       </div>
+
+      {shareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+            {copiedMessageVisible && (
+              <div className="absolute right-2 top-2 rounded bg-orange-100 px-3 py-1 text-orange-800 shadow">
+                ¡Copiado!
+              </div>
+            )}
+            <h2 className="mb-4 text-lg font-bold">Compartir diagrama</h2>
+            <p className="mb-2">Este es el enlace para compartir:</p>
+            <div className="mb-4 flex items-center rounded border px-2 py-1">
+              <input
+                type="text"
+                readOnly
+                value={shareUrl}
+                className="flex-1 outline-none"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(shareUrl);
+                  setCopiedMessageVisible(true);
+                  setTimeout(() => setCopiedMessageVisible(false), 2000);
+                }}
+                className="ml-2 rounded bg-orange-400 px-2 py-1 text-sm font-bold text-white hover:bg-orange-600"
+              >
+                Copiar
+              </button>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShareModalOpen(false)}
+                className="rounded bg-gray-300 px-4 py-2 font-bold hover:bg-gray-400"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Box>
   );
 };

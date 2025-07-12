@@ -131,6 +131,7 @@
         "copy": "Copy code",
         "undo": "Undo (Ctrl+Z)",
         "redo": "Redo (Ctrl+Y)",
+        "share": "Share",
         "toggleTheme": "Switch theme"
       }
     }
