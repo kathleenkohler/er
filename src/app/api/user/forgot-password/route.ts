@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     to: user.email,
     from: process.env.SMTP_USER,
     subject: "Restablece tu contraseña ERdoc Playground",
-    html:  `
+    html: `
     <div style="font-family: Arial, sans-serif; font-size: 16px; color: #333; line-height: 1.5; max-width: 600px; margin: auto; padding: 20px;">
       <p>Hola <strong>${user.name}</strong>,</p>
 
