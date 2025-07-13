@@ -3,12 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
+import { FaEnvelope, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useLocale } from "next-intl";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setClave] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -86,13 +87,18 @@ export default function Login() {
             <label className="mb-2 block text-sm">Contraseña</label>
             <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setClave(e.target.value)}
                 className="w-full rounded bg-gray-800 p-3 text-white focus:outline-none"
                 placeholder="Contraseña"
               />
-              <FaLock className="absolute right-3 top-3 text-gray-400" />
+              <div
+                className="absolute right-3 top-3 cursor-pointer text-gray-400"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </div>
             </div>
           </div>
           <a href="/forgot-password" className="mb-4 text-sm text-gray-400">
