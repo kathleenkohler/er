@@ -47,6 +47,20 @@ const entityWithDependencies = `
    }
 `;
 
+const entityWithDependenciesMultiline = `
+  entity bank_branch
+  depends on 
+  has_branches {
+    addr
+    branch_no pkey
+  }`;
+
+const entityPkeyWithSpaces = `
+  entity bank_branch depends on has_branches {
+    addr
+    branch_no pkey    
+  }`;
+
 const entityWith2Deps = `
    entity Program depends on Compiles,Parses {
         language
@@ -514,6 +528,36 @@ describe("Parses Entities", () => {
             column: 18,
           },
         },
+      },
+    ]);
+  });
+
+  it("parses an entity with multiline depends on", () => {
+    const er: ER = parse(entityWithDependenciesMultiline);
+    expect(er.entities).toMatchObject([
+      {
+        name: "bank_branch",
+        hasDependencies: true,
+        dependsOn: {
+          relationshipName: ["has_branches"],
+        },
+        attributes: [
+          { name: "addr", isKey: false },
+          { name: "branch_no", isKey: true },
+        ],
+      },
+    ]);
+  });
+
+  it("parses an entity with pkey followed by trailing spaces", () => {
+    const er: ER = parse(entityPkeyWithSpaces);
+    expect(er.entities).toMatchObject([
+      {
+        name: "bank_branch",
+        attributes: [
+          { name: "addr", isKey: false },
+          { name: "branch_no", isKey: true },
+        ],
       },
     ]);
   });

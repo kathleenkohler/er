@@ -4,6 +4,9 @@ import { parse } from "../../../src/ERDoc/parser";
 
 const regularAggregation = `aggregation Cliente_compra_producto(Compra)`;
 const explicitCurlyAggregation = `aggregation Cliente_compra_producto(Compra) {}`;
+const multilineAggregation = `aggregation Cliente_compra_producto(
+Compra
+)`;
 
 const badAggregations = [
   `aggregation Cliente_compra_producto(Compra`,
@@ -31,6 +34,29 @@ describe("Parses Aggregations", () => {
             offset: 43,
             line: 1,
             column: 44,
+          },
+        },
+      },
+    ]);
+  });
+
+  it("parses a multiline aggregation with line breaks", () => {
+    const er: ER = parse(multilineAggregation);
+    expect(er.aggregations).toStrictEqual<Aggregation[]>([
+      {
+        type: "aggregation",
+        name: "Cliente_compra_producto",
+        aggregatedRelationshipName: "Compra",
+        location: {
+          start: {
+            offset: 0,
+            line: 1,
+            column: 1,
+          },
+          end: {
+            offset: multilineAggregation.length,
+            line: 3,
+            column: 2,
           },
         },
       },

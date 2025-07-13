@@ -13,6 +13,13 @@ relation Attends(person M, concert 1) {
 }
 `;
 
+const multilineParticipantsRelationship = `
+relation has_branches(
+  bank N!,
+  bank_branch 1!
+)
+`;
+
 const explicitParticipationRelationship = `
 relation Attends(person M!, concert 1!) {
     seat_number
@@ -195,6 +202,28 @@ describe("Parses Relationships", () => {
             column: 17,
           },
         },
+      },
+    ]);
+  });
+
+  it("parses a relationship with line breaks between participants", () => {
+    const er: ER = parse(multilineParticipantsRelationship);
+    expect(er.relationships).toMatchObject([
+      {
+        type: "relationship",
+        name: "has_branches",
+        participantEntities: [
+          {
+            entityName: "bank",
+            cardinality: "N",
+            participation: "total",
+          },
+          {
+            entityName: "bank_branch",
+            cardinality: "1",
+            participation: "total",
+          },
+        ],
       },
     ]);
   });

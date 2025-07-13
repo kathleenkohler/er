@@ -4,7 +4,9 @@ import { parse } from "../../../src/ERDoc/parser";
 
 describe("Linter detects when an aggregation includes a relationship with a weak entity", () => {
   it("returns an error when an aggregation includes a weak entity", () => {
-    const errors = checkAggregationIncludesWeakEntity(AggregationWithWeakEntityER);
+    const errors = checkAggregationIncludesWeakEntity(
+      AggregationWithWeakEntityER,
+    );
     expect(errors.length).toBe(1);
     expect(errors[0].type).toBe("AGGREGATION_INCLUDES_WEAK_ENTITY");
     expect(errors[0].aggregationName).toBe("inscripcion_detallada");
@@ -12,7 +14,9 @@ describe("Linter detects when an aggregation includes a relationship with a weak
     expect(errors[0].weakEntityName).toBe("detalle");
   });
   it("returns no errors when all entities are strong", () => {
-    const errors = checkAggregationIncludesWeakEntity(AggregationNoWeakEntitiesER);
+    const errors = checkAggregationIncludesWeakEntity(
+      AggregationNoWeakEntitiesER,
+    );
     expect(errors.length).toBe(0);
   });
 });
@@ -45,4 +49,3 @@ relation inscripcion (curso, estudiante)
 
 aggregation inscripcion_detallada(inscripcion)
 `);
-
