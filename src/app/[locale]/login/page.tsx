@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FaEnvelope, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useLocale } from "next-intl";
+import { startTransition } from "react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -29,6 +30,7 @@ export default function Login() {
         credentials: "include",
         body: JSON.stringify({ email, password }),
       });
+
       if (!res.ok) {
         const data = await res.json();
         setError(data.error);
@@ -36,7 +38,11 @@ export default function Login() {
         return;
       }
       setLoading(false);
-      router.push(`/${locale}/user`);
+      startTransition(() => {
+        router.replace(`/${locale}/user`);
+        router.refresh();
+      });
+      //router.push(`/${locale}/user`);
     } catch (error) {
       console.error(error);
     }
